@@ -4,6 +4,8 @@ import DivisionsSection from '@/components/DivisionsSection';
 import PrincipalSection from '@/components/PrincipalSection';
 import AboutSection from '@/components/AboutSection';
 import AdmissionSection from '@/components/AdmissionSection';
+import AdminPanel from '@/components/AdminPanel';
+import AnnouncementSection from '@/components/AnnouncementSection';
 
 export default function Home() {
   return (
