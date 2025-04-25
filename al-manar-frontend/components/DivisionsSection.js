@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRouter } from 'next/router';
 
 const divisions = [
   {
@@ -16,10 +17,19 @@ const divisions = [
 ];
 
 const DivisionsSection = () => {
+  const router = useRouter();
+
+  const handleExplore = (title) => {
+    const path = title.toLowerCase().includes('national')
+      ? '/national-division'
+      : '/arabic-division';
+    router.push(path);
+  };
+
   return (
     <section id="divisions" className="bg-white py-20">
       <div className="text-center mb-12">
-        <h2 className="text-teal-600 font-bold text-xl">Heading</h2>
+        <h2 className="text-teal-600 font-bold text-xl">Divisions</h2>
         <p className="text-lg font-semibold">Check Out Our Educational Divisions</p>
       </div>
 
@@ -44,7 +54,10 @@ const DivisionsSection = () => {
                 {division.title}
               </h3>
               <p className="text-sm text-gray-600 mb-4">{division.description}</p>
-              <button className="bg-teal-500 text-white text-sm px-4 py-2 rounded-full hover:bg-teal-600">
+              <button
+                onClick={() => handleExplore(division.title)}
+                className="bg-teal-500 text-white text-sm px-4 py-2 rounded-full hover:bg-teal-600"
+              >
                 Explore more →
               </button>
             </div>

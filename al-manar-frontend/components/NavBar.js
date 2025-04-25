@@ -1,21 +1,51 @@
 import React from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 const Navbar = () => {
+  const router = useRouter();
+  const isHomePage = router.pathname === '/';
+
+  // Helper function to generate href
+  const getHref = (sectionId) => {
+    return isHomePage ? `#${sectionId}` : `/#${sectionId}`;
+  };
+
   return (
     <nav className="fixed w-full bg-white shadow-md z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo on far left */}
         <div className="flex items-center">
-          <img src="/assets/LOGO.png" alt="Logo" className="h-16 w-auto" /> {/* bigger logo */}
+          <img src="/assets/LOGO.png" alt="Logo" className="h-16 w-auto" />
         </div>
 
-        {/* Links in black */}
+        {/* Links */}
         <ul className="flex gap-6 font-bold text-lg text-black">
-          <li><a href="#home" className="hover:text-blue-500">Home</a></li>
-          <li><a href="#divisions" className="hover:text-blue-500">Divisions</a></li>
-          <li><a href="#about" className="hover:text-blue-500">About Us</a></li>
-          <li><a href="#admission" className="hover:text-blue-500">Admission</a></li>
-          <li><a href="/announcements" className="hover:text-blue-500">Announcements</a></li>
+          <li>
+            <Link href="/">
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link href={getHref('divisions')}>
+              Divisions
+            </Link>
+          </li>
+          <li>
+            <Link href={getHref('about')}>
+              About Us
+            </Link>
+          </li>
+          <li>
+            <Link href={getHref('admission')}>
+              Admission
+            </Link>
+          </li>
+          <li>
+            <Link href="/announcements">
+              Announcements
+            </Link>
+          </li>
         </ul>
       </div>
     </nav>
