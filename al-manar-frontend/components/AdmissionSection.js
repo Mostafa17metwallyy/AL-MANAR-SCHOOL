@@ -1,26 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
 const AdmissionSection = () => {
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    birthDate: '',
-    year: '',
-    division: '',
-    selectedSlot: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    birthDate: "",
+    year: "",
+    division: "",
+    selectedSlot: "",
   });
 
   const [availableSlots, setAvailableSlots] = useState([]);
 
   useEffect(() => {
-    // Fetch only unreserved slots
-    fetch('http://localhost:5000/api/timeslots')
+    fetch("http://localhost:5000/api/timeslots")
       .then((res) => res.json())
-      .then((data) => {
-        const unreserved = data.filter((s) => !s.reservedBy);
-        setAvailableSlots(unreserved);
-      });
+      .then((data) => setAvailableSlots(data));
   }, []);
 
   const handleChange = (e) => {
@@ -31,75 +27,89 @@ const AdmissionSection = () => {
     e.preventDefault();
 
     try {
-      // 1. Save admission form
-      const admissionRes = await fetch('http://localhost:5000/api/admission', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const admissionRes = await fetch("http://localhost:5000/api/admission", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
       if (!admissionRes.ok) {
         const errData = await admissionRes.json();
-        return alert('Form error: ' + errData.error);
+        return alert("Form error: " + errData.error);
       }
 
-      // 2. Reserve the selected time slot
-      const reserveRes = await fetch(
-        `http://localhost:5000/api/timeslots/${form.selectedSlot}/reserve`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userEmail: form.email }),
-        }
-      );
-
-      if (!reserveRes.ok) {
-        const err = await reserveRes.json();
-        return alert('Slot reservation failed: ' + err.error);
-      }
-
-      alert('Form submitted and slot reserved!');
+      alert("Form submitted and slot reserved!");
       setForm({
-        firstName: '',
-        lastName: '',
-        email: '',
-        birthDate: '',
-        year: '',
-        division: '',
-        selectedSlot: '',
+        firstName: "",
+        lastName: "",
+        email: "",
+        birthDate: "",
+        year: "",
+        division: "",
+        selectedSlot: "",
       });
     } catch (err) {
       console.error(err);
-      alert('Server error. Please try again later.');
+      alert("Server error. Please try again later.");
     }
   };
 
   return (
     <section id="admission" className="bg-white py-20">
       <div className="text-center mb-10">
-        <h2 className="text-teal-600 font-bold text-sm">Early Admission Is Now Available</h2>
+        <h2 className="text-teal-600 font-bold text-sm">
+          Early Admission Is Now Available
+        </h2>
         <p className="text-gray-500">Fill Out This Form</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto px-4 space-y-4">
-        {/* All input fields... */}
-        {/* firstName, lastName, email, birthDate, year, division */}
+      <form onSubmit={handleSubmit} className="max-w-md mx-auto px-4 space-y-4 text-black">
+        {["firstName", "lastName", "email", "birthDate", "year"].map((field, i) => (
+          <div key={i}>
+            <label className="block text-sm font-medium mb-1 capitalize">
+              {field === "year" ? "Academic Year*" : `${field.replace(/([A-Z])/g, " $1")}*`}
+            </label>
+            <input
+              type={field === "birthDate" ? "date" : "text"}
+              name={field}
+              value={form[field]}
+              onChange={handleChange}
+              placeholder={`Enter your ${field === "year" ? "grade" : field}...`}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-black placeholder:text-black"
+              required
+            />
+          </div>
+        ))}
 
-        {/* Slot selection dropdown */}
+        {/* Division */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Division*</label>
+          <select
+            name="division"
+            value={form.division}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-black bg-white"
+            required
+          >
+            <option value="" disabled hidden>Select division</option>
+            <option value="National Division">National Division</option>
+            <option value="Arabic Division">Arabic Division</option>
+          </select>
+        </div>
+
+        {/* Interview Slot */}
         <div>
           <label className="block text-sm font-medium mb-1">Choose Interview Slot*</label>
           <select
             name="selectedSlot"
             value={form.selectedSlot}
             onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-black bg-white"
             required
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-black"
           >
-            <option value="">Select a slot</option>
+            <option value="" disabled hidden>Select a slot</option>
             {availableSlots.map((slot) => (
-              <option key={slot._id} value={slot._id}>
-                {slot.slot}
-              </option>
+              <option key={slot._id} value={slot._id}>{slot.slot}</option>
             ))}
           </select>
         </div>

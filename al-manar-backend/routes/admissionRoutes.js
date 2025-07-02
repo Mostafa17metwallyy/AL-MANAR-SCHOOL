@@ -1,42 +1,70 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Admission = require("../models/Admission");
-const sendConfirmationEmail = require("../utils/sendEmail");
-const TimeSlot = require("../models/TimeSlot"); // for slot details
+const Admission = require('../models/Admission');
+const TimeSlot = require('../models/TimeSlot');
 
-// POST form submission
-router.post("/", async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const { selectedSlot, firstName, lastName, email } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      birthDate,
+      year,
+      division,
+      selectedSlot
+    } = req.body;
 
-    const admission = new Admission(req.body);
-    await admission.save();
+    if (!firstName || !lastName || !email || !birthDate || !year || !division || !selectedSlot) {
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
 
-    // Mark slot as reserved
     const slot = await TimeSlot.findById(selectedSlot);
     if (!slot || slot.reservedBy) {
-      return res.status(400).json({ error: "Slot already taken." });
+      return res.status(400).json({ error: 'Slot already reserved or not found.' });
     }
+
+    const admission = new Admission({
+      firstName,
+      lastName,
+      email,
+      birthDate,
+      year,
+      division,
+      timeSlot: slot.slot,
+    });
+
+    await admission.save();
 
     slot.reservedBy = email;
     await slot.save();
 
-    // Send confirmation email
-    await sendConfirmationEmail(email, `${firstName} ${lastName}`, slot.slot);
-
-    res.status(201).json({ message: "Form submitted & email sent" });
+    res.status(201).json({ message: 'Admission saved successfully' });
   } catch (err) {
-    res.status(500).json({ error: "Submission failed", details: err.message });
+    console.error(err);
+    res.status(500).json({ error: 'Admission submission failed' });
   }
 });
 
-// GET all submissions
-router.get("/", async (req, res) => {
+router.get('/', async (req, res) => {
   try {
-    const admissions = await Admission.find();
-    res.json(admissions);
+    const all = await Admission.find();
+    res.json(all);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch admissions", details: err });
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch admissions' });
+  }
+});
+
+// DELETE /api/admission/:id
+router.delete('/:id', async (req, res) => {
+  try {
+    const deleted = await Admission.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ error: 'Admission not found' });
+    res.status(200).json({ message: 'Admission deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error deleting admission' });
   }
 });
 
