@@ -8,14 +8,20 @@ const ArabicDivision = () => {
       <Navbar />
       <div className="h-20" />
 
-      {/* Updated Banner Matching Design */}
+      {/* Banner with Overlay */}
       <div className="relative w-full h-[65vh] rounded-b-xl overflow-hidden">
+        {/* Background Image */}
         <img
           src="/assets/4.jpg"
           alt="Arabic Division Banner"
-          className="w-full h-full object-cover object-center"
+          className="absolute inset-0 w-full h-full object-cover object-center z-0"
         />
-        <div className="absolute inset-0 flex items-center justify-center">
+
+        {/* Black Transparent Overlay */}
+        <div className="absolute inset-0 bg-black/40 z-10" />
+
+        {/* Centered Text */}
+        <div className="absolute inset-0 flex items-center justify-center z-20">
           <h1 className="text-white text-3xl md:text-5xl font-semibold text-center tracking-wide">
             WELCOME TO THE <br /> ARABIC DIVISIONS
           </h1>
@@ -24,13 +30,14 @@ const ArabicDivision = () => {
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-6 py-12">
-        <h2 className="text-xl font-bold border-l-4 border-teal-500 pl-3 mb-6">Arabic Division</h2>
+        <h2 className="text-black text-xl font-bold border-l-4 border-teal-500 pl-3 mb-6">Arabic Division</h2>
         <div className="space-y-6 text-gray-700 text-base leading-7">
           <p>Lorem ipsum dolor sit amet consectetur. Non tincidunt magna non et elit...</p>
           <p>Lorem ipsum dolor sit amet consectetur. Non tincidunt magna non et elit...</p>
           <p>Lorem ipsum dolor sit amet consectetur. Non tincidunt magna non et elit...</p>
         </div>
 
+        {/* Apply Button */}
         <div className="text-center mt-10">
           <Link href="/#admission">
             <button className="bg-teal-500 text-white px-6 py-3 rounded-full hover:bg-teal-600 transition">
@@ -39,8 +46,6 @@ const ArabicDivision = () => {
           </Link>
         </div>
       </div>
-
-      <img src="/assets/GREEN3.png" alt="Bottom Wave" className="w-full" />
     </div>
   );
 };

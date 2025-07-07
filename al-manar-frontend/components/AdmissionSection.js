@@ -16,7 +16,14 @@ const AdmissionSection = () => {
   useEffect(() => {
     fetch("http://localhost:5000/api/timeslots")
       .then((res) => res.json())
-      .then((data) => setAvailableSlots(data));
+      .then((data) => {
+        console.log("Fetched time slots:", data); // ✅ Debug log
+        setAvailableSlots(data.slots || data);   // ✅ Handles both array and object format
+      })
+      .catch((err) => {
+        console.error("Failed to fetch time slots:", err);
+        setAvailableSlots([]); // Fallback to empty array on error
+      });
   }, []);
 
   const handleChange = (e) => {
@@ -108,9 +115,13 @@ const AdmissionSection = () => {
             required
           >
             <option value="" disabled hidden>Select a slot</option>
-            {availableSlots.map((slot) => (
-              <option key={slot._id} value={slot._id}>{slot.slot}</option>
-            ))}
+            {Array.isArray(availableSlots) && availableSlots.length > 0 ? (
+              availableSlots.map((slot) => (
+                <option key={slot._id} value={slot._id}>{slot.slot}</option>
+              ))
+            ) : (
+              <option disabled>No available slots</option>
+            )}
           </select>
         </div>
 

@@ -11,10 +11,12 @@ const AnnouncementSection = () => {
   }, []);
 
   return (
-    <section className="min-h-screen bg-gradient-to-b from-white to-slate-100 py-20 px-4 flex items-center justify-center">
-      <div className="max-w-5xl w-full">
+    <section className="min-h-screen bg-gradient-to-b from-white to-slate-100 pt-32 pb-20 px-4 flex items-center justify-center">
+      <div className="max-w-7xl w-full">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-teal-700">📢 Announcements</h2>
+          <h2 className="text-3xl font-bold text-teal-700 whitespace-nowrap">
+            Announcements
+          </h2>
           <p className="text-gray-500">
             Stay up-to-date with the latest updates from our school
           </p>
@@ -23,14 +25,14 @@ const AnnouncementSection = () => {
         {announcements.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center text-gray-500 text-lg mt-20 animate-pulse">
             <p className="text-xl font-semibold text-gray-600">
-              📭 No announcements yet
+              No announcements yet
             </p>
             <p className="text-sm text-gray-400 mt-1">
               Please check back later for updates.
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {announcements.map((ann, index) => (
               <div
                 key={index}
