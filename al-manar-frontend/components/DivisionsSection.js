@@ -36,13 +36,13 @@ const DivisionsSection = () => {
   };
 
   return (
-    <section id="divisions" className="bg-white py-20">
+    <section id="divisions" className="bg-white py-28"> {/* ✅ Bigger top & bottom padding */}
       {/* ✅ Section Heading */}
-      <div className="text-center mb-12">
-        <h2 className="text-black font-bold text-xl">
+      <div className="text-center mb-16">
+        <h2 className="text-black font-bold text-3xl">
           {language === "en" ? "Divisions" : "الأقسام"}
         </h2>
-        <p className="text-lg font-semibold text-teal-600">
+        <p className="text-xl font-semibold text-teal-600 mt-3">
           {language === "en"
             ? "Check Out Our Educational Divisions"
             : "تعرّف على أقسامنا التعليمية"}
@@ -50,32 +50,33 @@ const DivisionsSection = () => {
       </div>
 
       {/* ✅ Division Cards */}
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-10">
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12">
         {divisions.map((division, index) => (
           <div
             key={index}
-            className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+            className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow"
           >
             <div className="relative">
+              {/* ✅ Taller images */}
               <img
                 src={division.image}
                 alt={division.title}
-                className="w-full h-48 object-cover"
+                className="w-full h-60 object-cover"
               />
-              <span className="absolute top-2 right-4 text-black text-3xl font-bold drop-shadow">
+              <span className="absolute top-3 right-5 text-black text-4xl font-bold drop-shadow">
                 {index + 1}
               </span>
             </div>
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-teal-600 mb-2 border-l-4 border-teal-600 pl-2">
+            <div className="p-8">
+              <h3 className="text-2xl font-semibold text-teal-600 mb-4 border-l-4 border-teal-600 pl-3">
                 {division.title}
               </h3>
-              <p className="text-sm text-gray-600 mb-4">
+              <p className="text-base text-gray-700 leading-relaxed mb-6">
                 {division.description}
               </p>
               <button
                 onClick={() => handleExplore(division.title)}
-                className="bg-teal-500 text-white text-sm px-4 py-2 rounded-full hover:bg-teal-600"
+                className="bg-teal-500 text-white text-lg px-6 py-3 rounded-full hover:bg-teal-600 transition-all"
               >
                 {language === "en" ? "Explore more →" : "استكشف المزيد →"}
               </button>

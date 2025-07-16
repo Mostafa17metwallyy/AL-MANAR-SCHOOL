@@ -86,30 +86,28 @@ const AdmissionSection = () => {
   };
 
   return (
-    <section id="admission" className="bg-white py-20">
+    <section id="admission" className="bg-white py-28"> {/* ✅ Increased section padding */}
       {/* ✅ Section Heading */}
-      <div className="text-center mb-10">
-        <h2 className="text-teal-600 font-bold text-sm">
+      <div className="text-center mb-14">
+        <h2 className="text-teal-600 font-bold text-2xl mb-2">
           {language === "en"
             ? "Early Admission Is Now Available"
             : "التقديم المبكر متاح الآن"}
         </h2>
-        <p className="text-gray-500">
-          {language === "en"
-            ? "Fill Out This Form"
-            : "يرجى ملء هذا النموذج"}
+        <p className="text-gray-600 text-lg">
+          {language === "en" ? "Fill Out This Form" : "يرجى ملء هذا النموذج"}
         </p>
       </div>
 
       {/* ✅ Form */}
       <form
         onSubmit={handleSubmit}
-        className="max-w-md mx-auto px-4 space-y-4 text-black"
+        className="max-w-lg mx-auto px-6 space-y-6 text-black"
       >
         {["firstName", "lastName", "email", "birthDate", "year"].map(
           (field, i) => (
             <div key={i}>
-              <label className="block text-sm font-medium mb-1">
+              <label className="block text-base font-medium mb-2">
                 {labelText[field]}
               </label>
               <input
@@ -120,7 +118,9 @@ const AdmissionSection = () => {
                 placeholder={
                   language === "en"
                     ? `Enter your ${
-                        field === "year" ? "grade" : field.replace(/([A-Z])/g, " $1").toLowerCase()
+                        field === "year"
+                          ? "grade"
+                          : field.replace(/([A-Z])/g, " $1").toLowerCase()
                       }...`
                     : `أدخل ${
                         field === "year"
@@ -134,7 +134,7 @@ const AdmissionSection = () => {
                           : "اسم العائلة"
                       }...`
                 }
-                className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-black placeholder:text-black"
+                className="w-full border border-gray-300 rounded px-4 py-3 text-base text-black placeholder:text-gray-700"
                 required
               />
             </div>
@@ -143,14 +143,14 @@ const AdmissionSection = () => {
 
         {/* ✅ Division */}
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-base font-medium mb-2">
             {language === "en" ? "Division*" : "القسم*"}
           </label>
           <select
             name="division"
             value={form.division}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-black bg-white"
+            className="w-full border border-gray-300 rounded px-4 py-3 text-base text-black bg-white"
             required
           >
             <option value="" disabled hidden>
@@ -167,7 +167,7 @@ const AdmissionSection = () => {
 
         {/* ✅ Interview Slot */}
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-base font-medium mb-2">
             {language === "en"
               ? "Choose Interview Slot*"
               : "اختر موعد المقابلة*"}
@@ -176,13 +176,11 @@ const AdmissionSection = () => {
             name="selectedSlot"
             value={form.selectedSlot}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-black bg-white"
+            className="w-full border border-gray-300 rounded px-4 py-3 text-base text-black bg-white"
             required
           >
             <option value="" disabled hidden>
-              {language === "en"
-                ? "Select a slot"
-                : "اختر موعداً"}
+              {language === "en" ? "Select a slot" : "اختر موعداً"}
             </option>
             {Array.isArray(availableSlots) && availableSlots.length > 0 ? (
               availableSlots.map((slot) => (
@@ -201,10 +199,10 @@ const AdmissionSection = () => {
         </div>
 
         {/* ✅ Submit Button */}
-        <div className="text-center pt-4">
+        <div className="text-center pt-6">
           <button
             type="submit"
-            className="bg-teal-500 text-white px-6 py-2 rounded-full hover:bg-teal-600 transition"
+            className="bg-teal-500 text-white text-lg px-8 py-3 rounded-full hover:bg-teal-600 transition-all"
           >
             {language === "en" ? "SUBMIT" : "إرسال"}
           </button>
