@@ -1,20 +1,40 @@
-import React from "react";
-import { FaPlayCircle } from "react-icons/fa";
-import { useLanguage } from "./LanguageContext"; // ✅ Import language hook
+import React, { useEffect, useRef } from "react";
+import { useLanguage } from "./LanguageContext"; 
 
 const AboutSection = () => {
-  const { language } = useLanguage(); // ✅ Get selected language
+  const { language } = useLanguage();
+  const videoRef = useRef(null);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && videoRef.current) {
+            videoRef.current.play();
+          } else if (videoRef.current) {
+            videoRef.current.pause();
+          }
+        });
+      },
+      { threshold: 0.3 } // Play when 30% of section is visible
+    );
+
+    if (sectionRef.current) observer.observe(sectionRef.current);
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <section id="about" className="bg-white py-28"> {/* ✅ Increased padding */}
+    <section id="about" ref={sectionRef} className="bg-white py-28">
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-14">
         
         {/* ✅ Left Side Text */}
         <div className="md:w-1/2">
-          <h2 className="text-teal-600 font-bold text-2xl mb-4"> {/* ✅ Bigger heading */}
+          <h2 className="text-teal-600 font-bold text-2xl mb-4">
             {language === "en" ? "Al Manar School" : "مدرسة المنار"}
           </h2>
-          <p className="text-lg text-gray-700 leading-relaxed"> {/* ✅ Bigger paragraph */}
+          <p className="text-lg text-gray-700 leading-relaxed">
             {language === "en"
               ? (
                 <>
@@ -31,15 +51,16 @@ const AboutSection = () => {
           </p>
         </div>
 
-        {/* ✅ Right Side Logo/Image */}
+        {/* ✅ Right Side Video */}
         <div className="md:w-1/2 relative rounded-2xl overflow-hidden shadow-xl">
-          <img
-            src="/assets/LOGO.png" // ✅ Using your logo
-            alt="Al Manar School Logo"
-            className="w-full h-72 object-contain bg-white p-6" // ✅ Bigger height & proper scaling
+          <video
+            ref={videoRef}
+            src="/assets/school_video.mp4" // ✅ replace with actual video path
+            className="w-full h-[36rem] object-cover rounded-xl"
+            muted
+            loop
+            playsInline
           />
-          {/* Optional play icon - remove if not needed */}
-          {/* <FaPlayCircle className="absolute inset-0 m-auto text-teal-500 text-7xl opacity-80 pointer-events-none" /> */}
         </div>
       </div>
     </section>
