@@ -1,10 +1,18 @@
 import React from 'react';
 import { FaFacebookF, FaLinkedinIn } from 'react-icons/fa';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useLanguage } from './LanguageContext'; // ✅ Import language context
 
 const Footer = () => {
-  const { language } = useLanguage(); // ✅ Get current language
+  const { language } = useLanguage();
+  const router = useRouter();
+  const isHomePage = router.pathname === '/';
+
+  // ✅ Reuse logic from Navbar
+  const getHref = (sectionId) => {
+    return isHomePage ? `#${sectionId}` : `/#${sectionId}`;
+  };
 
   return (
     <footer className="bg-teal-600 text-white mt-0">
@@ -16,14 +24,14 @@ const Footer = () => {
             <Link href="/">
               {language === 'en' ? 'Home' : 'الرئيسية'}
             </Link>
-            <Link href="/about">
-              {language === 'en' ? 'About' : 'من نحن'}
+            <Link href={getHref('about')}>
+              {language === 'en' ? 'About Us' : 'من نحن'}
             </Link>
-            <Link href="/menu">
-              {language === 'en' ? 'Menu' : 'القائمة'}
+            <Link href={getHref('divisions')}>
+              {language === 'en' ? 'Divisions' : 'الأقسام'}
             </Link>
-            <Link href="/contact">
-              {language === 'en' ? 'Contact' : 'اتصل بنا'}
+            <Link href={getHref('admission')}>
+              {language === 'en' ? 'Admission' : 'التقديم'}
             </Link>
             <Link href="/announcements">
               {language === 'en' ? 'Announcements' : 'الإعلانات'}

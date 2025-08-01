@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { useLanguage } from "./LanguageContext"; // Adjust the path if needed
 
 const AdminPanel = () => {
   const router = useRouter();
+  const { language } = useLanguage();
 
   const [admissions, setAdmissions] = useState([]);
   const [slots, setSlots] = useState([]);
@@ -17,12 +19,6 @@ const AdminPanel = () => {
   const [announcements, setAnnouncements] = useState([]);
   const BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000";
 
-  useEffect(() => {
-    const isAdmin = sessionStorage.getItem("isAdmin");
-    if (isAdmin !== "true") {
-      router.replace("/login");
-    }
-  }, []);
 
   useEffect(() => {
     const isAdmin = localStorage.getItem("isAdmin");
@@ -137,50 +133,61 @@ const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 relative">
+    <div
+      className="min-h-screen bg-gray-100 p-6"
+      dir={language === "ar" ? "rtl" : "ltr"}
+    >
       {/* Logout Button */}
       <button
         onClick={handleLogout}
-        className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded"
+        className="fixed top-6 right-6 bg-red-600 text-white px-4 py-2 rounded z-50 shadow-md"
       >
-        Logout
+        {language === "en" ? "Logout" : "تسجيل الخروج"}
       </button>
 
       <div className="max-w-5xl mx-auto space-y-10">
         <h1 className="text-3xl font-bold text-center text-black">
-          Admin Panel
+          {language === "en" ? "Admin Panel" : "لوحة التحكم"}
         </h1>
 
         {/* Admissions Table */}
         <section>
           <h2 className="text-2xl font-semibold mb-4 text-black">
-            All Admissions
+            {language === "en" ? "All Admissions" : "جميع الطلبات"}
           </h2>
-          <table className="w-full bg-white rounded shadow">
+          <table className="w-full bg-white rounded shadow text-black">
             <thead className="bg-teal-600 text-white">
               <tr>
-                <th className="px-4 py-2">Name</th>
+                <th className="px-4 py-2">
+                  {language === "en" ? "Name" : "الاسم"}
+                </th>
                 <th className="px-4 py-2">Email</th>
-                <th className="px-4 py-2">Division</th>
-                <th className="px-4 py-2">Slot</th>
-                <th className="px-4 py-2">Actions</th>
+                <th className="px-4 py-2">
+                  {language === "en" ? "Division" : "القسم"}
+                </th>
+                <th className="px-4 py-2">
+                  {language === "en" ? "Slot" : "الميعاد"}
+                </th>
+                <th className="px-4 py-2">
+                  {language === "en" ? "Actions" : "إجراءات"}
+                </th>
               </tr>
             </thead>
             <tbody>
               {admissions.map((a, i) => (
                 <tr key={i} className="even:bg-gray-50">
-                  <td className="px-4 py-2 text-black">
+                  <td className="px-4 py-2">
                     {a.firstName} {a.lastName}
                   </td>
-                  <td className="px-4 py-2 text-black">{a.email}</td>
-                  <td className="px-4 py-2 text-black">{a.division}</td>
-                  <td className="px-4 py-2 text-black">{a.timeSlot}</td>
+                  <td className="px-4 py-2">{a.email}</td>
+                  <td className="px-4 py-2">{a.division}</td>
+                  <td className="px-4 py-2">{a.timeSlot}</td>
                   <td className="px-4 py-2">
                     <button
                       onClick={() => handleDeleteAdmission(a._id)}
                       className="text-sm bg-red-500 text-white px-3 py-1 rounded"
                     >
-                      Delete
+                      {language === "en" ? "Delete" : "حذف"}
                     </button>
                   </td>
                 </tr>
@@ -192,7 +199,7 @@ const AdminPanel = () => {
         {/* Time Slot Creation */}
         <section>
           <h2 className="text-xl font-semibold mb-2 text-black">
-            Add Time Slot
+            {language === "en" ? "Add Time Slot" : "إضافة موعد"}
           </h2>
           <form onSubmit={handleSlotSubmit} className="flex gap-3 items-center">
             <input
@@ -213,7 +220,7 @@ const AdminPanel = () => {
               type="submit"
               className="bg-teal-600 text-white px-4 py-2 rounded"
             >
-              Add
+              {language === "en" ? "Add" : "إضافة"}
             </button>
           </form>
           <div className="mt-4 space-y-2">
@@ -222,12 +229,12 @@ const AdminPanel = () => {
                 key={slot._id}
                 className="flex justify-between bg-white p-3 rounded shadow"
               >
-                <span className="text-black">{slot.slot}</span>
+                <span>{slot.slot}</span>
                 <button
                   onClick={() => handleDeleteSlot(slot._id)}
                   className="bg-red-500 text-white px-3 py-1 rounded"
                 >
-                  Delete
+                  {language === "en" ? "Delete" : "حذف"}
                 </button>
               </div>
             ))}
@@ -237,12 +244,12 @@ const AdminPanel = () => {
         {/* Add Announcement */}
         <section>
           <h2 className="text-xl font-semibold mb-2 text-black">
-            Post Announcement
+            {language === "en" ? "Post Announcement" : "إضافة إعلان"}
           </h2>
           <form onSubmit={handleAnnouncementSubmit} className="space-y-3">
             <input
               type="text"
-              placeholder="Title"
+              placeholder={language === "en" ? "Title" : "العنوان"}
               value={announcement.title}
               onChange={(e) =>
                 setAnnouncement({ ...announcement, title: e.target.value })
@@ -251,7 +258,7 @@ const AdminPanel = () => {
               required
             />
             <textarea
-              placeholder="Description"
+              placeholder={language === "en" ? "Description" : "الوصف"}
               value={announcement.description}
               onChange={(e) =>
                 setAnnouncement({
@@ -280,7 +287,7 @@ const AdminPanel = () => {
               type="submit"
               className="bg-blue-600 text-white px-6 py-2 rounded"
             >
-              Post
+              {language === "en" ? "Post" : "نشر"}
             </button>
           </form>
         </section>
@@ -288,7 +295,7 @@ const AdminPanel = () => {
         {/* Show Announcements */}
         <section>
           <h2 className="text-2xl font-semibold mb-4 text-black">
-            Announcements
+            {language === "en" ? "Announcements" : "الإعلانات"}
           </h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {announcements.map((ann, index) => (
@@ -331,7 +338,7 @@ const AdminPanel = () => {
                       onClick={() => handleSaveAnnouncement(index)}
                       className="bg-green-600 text-white px-3 py-1 mr-2 rounded"
                     >
-                      Save
+                      {language === "en" ? "Save" : "حفظ"}
                     </button>
                     <button
                       onClick={() => {
@@ -341,7 +348,7 @@ const AdminPanel = () => {
                       }}
                       className="bg-gray-400 text-white px-3 py-1 rounded"
                     >
-                      Cancel
+                      {language === "en" ? "Cancel" : "إلغاء"}
                     </button>
                   </>
                 ) : (
@@ -371,13 +378,13 @@ const AdminPanel = () => {
                         }}
                         className="bg-yellow-500 text-white px-3 py-1 rounded"
                       >
-                        Edit
+                        {language === "en" ? "Edit" : "تعديل"}
                       </button>
                       <button
                         onClick={() => handleDeleteAnnouncement(ann._id)}
                         className="bg-red-500 text-white px-3 py-1 rounded"
                       >
-                        Delete
+                        {language === "en" ? "Delete" : "حذف"}
                       </button>
                     </div>
                   </>

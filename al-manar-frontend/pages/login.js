@@ -8,7 +8,7 @@ export default function Login() {
   const router = useRouter();
 
   useEffect(() => {
-    const isAdmin = sessionStorage.getItem("isAdmin");
+    const isAdmin = localStorage.getItem("isAdmin");
     if (isAdmin === "true") {
       router.replace("/admin");
     }
@@ -17,11 +17,11 @@ export default function Login() {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    const validUsername = "admin";
-    const validPassword = "admin123";
+    const validUsername = process.env.NEXT_PUBLIC_ADMIN_USERNAME;
+    const validPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
 
     if (username === validUsername && password === validPassword) {
-      sessionStorage.setItem("isAdmin", "true");
+      localStorage.setItem("isAdmin", "true");
       router.push("/admin");
     } else {
       setError("Invalid username or password");
@@ -31,7 +31,9 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-6 text-black">Admin Login</h2>
+        <h2 className="text-2xl font-semibold text-center mb-6 text-black">
+          Admin Login
+        </h2>
         <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="text"
@@ -50,7 +52,10 @@ export default function Login() {
             required
           />
           {error && <p className="text-red-600 text-sm text-center">{error}</p>}
-          <button type="submit" className="w-full bg-teal-600 text-white py-2 rounded">
+          <button
+            type="submit"
+            className="w-full bg-teal-600 text-white py-2 rounded"
+          >
             Login
           </button>
         </form>
