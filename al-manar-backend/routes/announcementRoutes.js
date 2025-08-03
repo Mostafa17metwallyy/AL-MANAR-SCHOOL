@@ -9,7 +9,7 @@ const { v2: cloudinary } = require("../utils/cloudinary");
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Helper to stream upload to Cloudinary
+// ✅ Helper to stream upload to Cloudinary
 const uploadToCloudinary = (fileBuffer, folder) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
@@ -31,6 +31,13 @@ router.post("/", upload.single("media"), async (req, res) => {
   try {
     const { title, description, mediaType } = req.body;
 
+    console.log("📨 Incoming POST /api/announcements:", {
+      title,
+      description,
+      mediaType,
+      file: req.file ? "✅ Received" : "❌ MISSING",
+    });
+
     let mediaUrl = "";
     let publicId = "";
 
@@ -51,8 +58,10 @@ router.post("/", upload.single("media"), async (req, res) => {
     await newAnnouncement.save();
     res.status(201).json(newAnnouncement);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create announcement", details: err });
+    console.error("❌ Error creating announcement:", err);
+    res
+      .status(500)
+      .json({ error: "Failed to create announcement", details: err.message });
   }
 });
 
@@ -62,7 +71,9 @@ router.get("/", async (req, res) => {
     const announcements = await Announcement.find();
     res.json(announcements);
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch announcements", details: err });
+    res
+      .status(500)
+      .json({ error: "Failed to fetch announcements", details: err.message });
   }
 });
 
@@ -86,14 +97,20 @@ router.put("/:id", upload.single("media"), async (req, res) => {
       updateData.publicId = result.public_id;
     }
 
-    const updated = await Announcement.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-    });
+    const updated = await Announcement.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      {
+        new: true,
+      }
+    );
 
     res.json(updated);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to update announcement", details: err });
+    res
+      .status(500)
+      .json({ error: "Failed to update announcement", details: err });
   }
 });
 
@@ -115,7 +132,9 @@ router.delete("/:id", async (req, res) => {
     await Announcement.findByIdAndDelete(req.params.id);
     res.json({ message: "Announcement deleted" });
   } catch (err) {
-    res.status(500).json({ error: "Failed to delete announcement", details: err });
+    res
+      .status(500)
+      .json({ error: "Failed to delete announcement", details: err });
   }
 });
 
