@@ -19,7 +19,6 @@ const AdminPanel = () => {
   const [announcements, setAnnouncements] = useState([]);
   const BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000";
 
-
   useEffect(() => {
     const isAdmin = localStorage.getItem("isAdmin");
     if (isAdmin !== "true") {
@@ -93,19 +92,30 @@ const AdminPanel = () => {
     formData.append("mediaType", announcement.mediaType);
     if (announcement.file) formData.append("media", announcement.file);
 
-    const res = await fetch(`${BASE}/api/announcements`, {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch(`${BASE}/api/announcements`, {
+        method: "POST",
+        body: formData,
+      });
 
-    const newAnn = await res.json();
-    setAnnouncements((prev) => [...prev, { ...newAnn, editing: false }]);
-    setAnnouncement({
-      title: "",
-      description: "",
-      mediaType: "text",
-      file: null,
-    });
+      const newAnn = await res.json();
+
+      if (!res.ok || !newAnn._id) {
+        console.error("❌ Announcement creation failed:", newAnn);
+        return alert("Failed to create announcement. Check server logs.");
+      }
+
+      setAnnouncements((prev) => [...prev, { ...newAnn, editing: false }]);
+      setAnnouncement({
+        title: "",
+        description: "",
+        mediaType: "text",
+        file: null,
+      });
+    } catch (err) {
+      console.error("❌ Error creating announcement:", err);
+      alert("Server error");
+    }
   };
 
   const handleDeleteAnnouncement = async (id) => {
@@ -357,18 +367,19 @@ const AdminPanel = () => {
                       {ann.title}
                     </h3>
                     <p className="text-sm mb-2 text-black">{ann.description}</p>
-                    {ann.mediaType === "image" && (
+                    {ann.mediaType === "image" && ann.mediaUrl && (
                       <img
-                        src={`${BASE}${ann.mediaUrl}`}
+                        src={ann.mediaUrl}
                         className="w-full rounded mb-2"
-                        alt=""
+                        alt="announcement media"
                       />
                     )}
-                    {ann.mediaType === "video" && (
+                    {ann.mediaType === "video" && ann.mediaUrl && (
                       <video controls className="w-full rounded mb-2">
-                        <source src={`${BASE}${ann.mediaUrl}`} />
+                        <source src={ann.mediaUrl} />
                       </video>
                     )}
+
                     <div className="flex gap-2">
                       <button
                         onClick={() => {

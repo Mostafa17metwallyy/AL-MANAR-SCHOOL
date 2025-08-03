@@ -8,6 +8,7 @@ require('dotenv').config();
 const admissionRoutes = require('./routes/admissionRoutes');
 const timeSlotRoutes = require('./routes/timeslotRoutes');
 const announcementRoutes = require('./routes/announcementRoutes');
+const uploadRoute = require('./routes/upload');
 
 const app = express();
 
@@ -16,8 +17,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -31,12 +30,15 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use('/api/admission', admissionRoutes);
 app.use('/api/timeslots', timeSlotRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api', uploadRoute); // handles POST /api/upload
 
-// Root route (optional health check)
+// Root route (health check)
 app.get('/', (req, res) => {
-  res.send('AL Manar School API is running...');
+  res.send('✅ AL Manar School API is running...');
 });
 
 // Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});

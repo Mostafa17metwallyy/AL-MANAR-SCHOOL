@@ -58,7 +58,7 @@ const AnnouncementSection = () => {
                   {/* ✅ Media Rendering */}
                   {ann.mediaType === "image" && ann.mediaUrl && (
                     <img
-                      src={`${process.env.NEXT_PUBLIC_API_BASE}${ann.mediaUrl}`}
+                      src={ann.mediaUrl}
                       alt="announcement media"
                       className="w-full rounded-md object-cover"
                     />
@@ -66,10 +66,7 @@ const AnnouncementSection = () => {
 
                   {ann.mediaType === "video" && ann.mediaUrl && (
                     <video controls className="w-full rounded-md">
-                      <source
-                        src={`${process.env.NEXT_PUBLIC_API_BASE}${ann.mediaUrl}`}
-                        type="video/mp4"
-                      />
+                      <source src={ann.mediaUrl} type="video/mp4" />
                       {language === "en"
                         ? "Your browser does not support the video tag."
                         : "متصفحك لا يدعم تشغيل الفيديو."}

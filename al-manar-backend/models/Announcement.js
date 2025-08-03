@@ -5,6 +5,7 @@ const announcementSchema = new mongoose.Schema({
   description: String,
   mediaUrl: String,
   mediaType: String,
+  publicId: String, // ✅ Add this
   createdAt: { type: Date, default: Date.now }
 });
 
