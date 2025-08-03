@@ -6,6 +6,7 @@ import AboutSection from '@/components/AboutSection';
 import AdmissionSection from '@/components/AdmissionSection';
 import AdminPanel from '@/components/AdminPanel';
 import AnnouncementSection from '@/components/AnnouncementSection';
+import LocationSection from '@/components/LocationSection';
 
 export default function Home() {
   return (
@@ -15,6 +16,7 @@ export default function Home() {
       <DivisionsSection />
       <PrincipalSection />
       <AboutSection/>
+      <LocationSection/>
       <AdmissionSection/>
     </div>
   );
