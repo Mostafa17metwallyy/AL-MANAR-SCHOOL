@@ -125,18 +125,25 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ error: "Announcement not found" });
     }
 
-    if (announcement.publicId) {
-      await cloudinary.uploader.destroy(announcement.publicId, {
-        resource_type: "auto",
-      });
+    // ✅ Check for a valid publicId before trying to delete from Cloudinary
+    if (announcement.publicId && typeof announcement.publicId === "string") {
+      try {
+        await cloudinary.uploader.destroy(announcement.publicId, {
+          resource_type: "auto",
+        });
+      } catch (cloudErr) {
+        console.error("❌ Cloudinary deletion failed:", cloudErr.message);
+        // Optionally continue deletion even if cloud delete fails
+      }
     }
 
     await Announcement.findByIdAndDelete(req.params.id);
     res.json({ message: "Announcement deleted" });
   } catch (err) {
+    console.error("❌ Server error on announcement delete:", err.message);
     res
       .status(500)
-      .json({ error: "Failed to delete announcement", details: err });
+      .json({ error: "Failed to delete announcement", details: err.message });
   }
 });
 
