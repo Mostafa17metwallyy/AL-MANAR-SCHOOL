@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLanguage } from "./LanguageContext"; // ✅ Import language hook
+import { useLanguage } from "./LanguageContext"; // Adjust the path if needed
 
 const AdmissionSection = () => {
   const [form, setForm] = useState({
@@ -13,17 +13,24 @@ const AdmissionSection = () => {
   });
 
   const [availableSlots, setAvailableSlots] = useState([]);
-  const { language } = useLanguage(); // ✅ Get current language
+  const { language } = useLanguage();
+  const BASE = process.env.NEXT_PUBLIC_API_BASE;
 
   useEffect(() => {
-    fetch("https://al-manar-school.vercel.app/api/timeslots")
-      .then((res) => res.json())
+    fetch(`${BASE}/api/timeslots`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const err = await res.json();
+          console.error("🚨 Error fetching slots:", err);
+          return;
+        }
+        return res.json();
+      })
       .then((data) => {
-        console.log("Fetched time slots:", data);
-        setAvailableSlots(data.slots || data);
+        setAvailableSlots(data.slots || data || []);
       })
       .catch((err) => {
-        console.error("Failed to fetch time slots:", err);
+        console.error("Failed to fetch slots:", err);
         setAvailableSlots([]);
       });
   }, []);
@@ -36,18 +43,19 @@ const AdmissionSection = () => {
     e.preventDefault();
 
     try {
-      const admissionRes = await fetch("http://localhost:5000/api/admission", {
+      const admissionRes = await fetch(`${BASE}/api/admission`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
+      const resJson = await admissionRes.json();
+
       if (!admissionRes.ok) {
-        const errData = await admissionRes.json();
         return alert(
           language === "en"
-            ? "Form error: " + errData.error
-            : "خطأ في النموذج: " + errData.error
+            ? "Form error: " + resJson.error
+            : "خطأ في النموذج: " + resJson.error
         );
       }
 
@@ -76,7 +84,6 @@ const AdmissionSection = () => {
     }
   };
 
-  // ✅ Label translations
   const labelText = {
     firstName: language === "en" ? "First Name*" : "الاسم الأول*",
     lastName: language === "en" ? "Last Name*" : "اسم العائلة*",
@@ -86,8 +93,7 @@ const AdmissionSection = () => {
   };
 
   return (
-    <section id="admission" className="bg-white py-28"> {/* ✅ Increased section padding */}
-      {/* ✅ Section Heading */}
+    <section id="admission" className="bg-white py-28">
       <div className="text-center mb-14">
         <h2 className="text-teal-600 font-bold text-2xl mb-2">
           {language === "en"
@@ -99,7 +105,6 @@ const AdmissionSection = () => {
         </p>
       </div>
 
-      {/* ✅ Form */}
       <form
         onSubmit={handleSubmit}
         className="max-w-lg mx-auto px-6 space-y-6 text-black"
@@ -141,7 +146,6 @@ const AdmissionSection = () => {
           )
         )}
 
-        {/* ✅ Division */}
         <div>
           <label className="block text-base font-medium mb-2">
             {language === "en" ? "Division*" : "القسم*"}
@@ -165,7 +169,6 @@ const AdmissionSection = () => {
           </select>
         </div>
 
-        {/* ✅ Interview Slot */}
         <div>
           <label className="block text-base font-medium mb-2">
             {language === "en"
@@ -198,7 +201,6 @@ const AdmissionSection = () => {
           </select>
         </div>
 
-        {/* ✅ Submit Button */}
         <div className="text-center pt-6">
           <button
             type="submit"
