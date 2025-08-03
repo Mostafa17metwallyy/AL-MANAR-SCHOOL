@@ -99,11 +99,7 @@ const AdminPanel = () => {
       });
 
       const newAnn = await res.json();
-
-      if (!res.ok || !newAnn._id) {
-        console.error("❌ Announcement creation failed:", newAnn);
-        return alert("Failed to create announcement. Check server logs.");
-      }
+      if (!res.ok || !newAnn._id) return alert("Failed to create announcement.");
 
       setAnnouncements((prev) => [...prev, { ...newAnn, editing: false }]);
       setAnnouncement({
@@ -112,8 +108,7 @@ const AdminPanel = () => {
         mediaType: "text",
         file: null,
       });
-    } catch (err) {
-      console.error("❌ Error creating announcement:", err);
+    } catch {
       alert("Server error");
     }
   };
@@ -122,24 +117,13 @@ const AdminPanel = () => {
     const res = await fetch(`${BASE}/api/announcements/${id}`, {
       method: "DELETE",
     });
+    if (!res.ok) return alert("Delete failed");
 
-    if (!res.ok) {
-      alert("Delete failed");
-      return;
-    }
-
-    // ✅ Re-fetch updated list from server after deletion
-    try {
-      const updatedRes = await fetch(`${BASE}/api/announcements`);
-      const updatedData = await updatedRes.json();
-
-      if (Array.isArray(updatedData)) {
-        setAnnouncements(updatedData.map((a) => ({ ...a, editing: false })));
-      } else {
-        console.error("❌ Failed to reload announcements:", updatedData);
-      }
-    } catch (err) {
-      console.error("❌ Re-fetch failed:", err);
+    const updated = await fetch(`${BASE}/api/announcements`).then((r) =>
+      r.json()
+    );
+    if (Array.isArray(updated)) {
+      setAnnouncements(updated.map((a) => ({ ...a, editing: false })));
     }
   };
 
@@ -155,7 +139,6 @@ const AdminPanel = () => {
       method: "PUT",
       body: formData,
     });
-
     const updated = await res.json();
     const updatedList = [...announcements];
     updatedList[index] = { ...updated, editing: false };
@@ -167,7 +150,7 @@ const AdminPanel = () => {
       className="min-h-screen bg-gray-100 p-6"
       dir={language === "ar" ? "rtl" : "ltr"}
     >
-      {/* Logout Button */}
+      {/* Logout */}
       <button
         onClick={handleLogout}
         className="fixed top-6 right-6 bg-red-600 text-white px-4 py-2 rounded z-50 shadow-md"
@@ -175,75 +158,70 @@ const AdminPanel = () => {
         {language === "en" ? "Logout" : "تسجيل الخروج"}
       </button>
 
-      <div className="max-w-5xl mx-auto space-y-10">
+      <div className="max-w-6xl mx-auto space-y-10">
         <h1 className="text-3xl font-bold text-center text-black">
           {language === "en" ? "Admin Panel" : "لوحة التحكم"}
         </h1>
 
-        {/* Admissions Table */}
+        {/* Admissions */}
         <section>
           <h2 className="text-2xl font-semibold mb-4 text-black">
             {language === "en" ? "All Admissions" : "جميع الطلبات"}
           </h2>
-          <table className="w-full bg-white rounded shadow text-black">
-            <thead className="bg-teal-600 text-white">
-              <tr>
-                <th className="px-4 py-2">
-                  {language === "en" ? "Name" : "الاسم"}
-                </th>
-                <th className="px-4 py-2">Email</th>
-                <th className="px-4 py-2">
-                  {language === "en" ? "Division" : "القسم"}
-                </th>
-                <th className="px-4 py-2">
-                  {language === "en" ? "Slot" : "الميعاد"}
-                </th>
-                <th className="px-4 py-2">
-                  {language === "en" ? "Actions" : "إجراءات"}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {admissions.map((a, i) => (
-                <tr key={i} className="even:bg-gray-50">
-                  <td className="px-4 py-2">
-                    {a.firstName} {a.lastName}
-                  </td>
-                  <td className="px-4 py-2">{a.email}</td>
-                  <td className="px-4 py-2">{a.division}</td>
-                  <td className="px-4 py-2">{a.timeSlot}</td>
-                  <td className="px-4 py-2">
-                    <button
-                      onClick={() => handleDeleteAdmission(a._id)}
-                      className="text-sm bg-red-500 text-white px-3 py-1 rounded"
-                    >
-                      {language === "en" ? "Delete" : "حذف"}
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white rounded shadow text-black">
+              <thead className="bg-teal-600 text-white">
+                <tr>
+                  <th className="px-4 py-2">{language === "en" ? "Name" : "الاسم"}</th>
+                  <th className="px-4 py-2">Email</th>
+                  <th className="px-4 py-2">{language === "en" ? "Division" : "القسم"}</th>
+                  <th className="px-4 py-2">{language === "en" ? "Slot" : "الميعاد"}</th>
+                  <th className="px-4 py-2">{language === "en" ? "Actions" : "إجراءات"}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {admissions.map((a, i) => (
+                  <tr key={i} className="even:bg-gray-50">
+                    <td className="px-4 py-2">{a.firstName} {a.lastName}</td>
+                    <td className="px-4 py-2">{a.email}</td>
+                    <td className="px-4 py-2">{a.division}</td>
+                    <td className="px-4 py-2">{a.timeSlot}</td>
+                    <td className="px-4 py-2">
+                      <button
+                        onClick={() => handleDeleteAdmission(a._id)}
+                        className="text-sm bg-red-500 text-white px-3 py-1 rounded"
+                      >
+                        {language === "en" ? "Delete" : "حذف"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
 
-        {/* Time Slot Creation */}
+        {/* Slots */}
         <section>
           <h2 className="text-xl font-semibold mb-2 text-black">
             {language === "en" ? "Add Time Slot" : "إضافة موعد"}
           </h2>
-          <form onSubmit={handleSlotSubmit} className="flex gap-3 items-center">
+          <form
+            onSubmit={handleSlotSubmit}
+            className="flex flex-col sm:flex-row gap-3 items-start sm:items-center"
+          >
             <input
               type="time"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              className="border px-3 py-2 rounded text-black"
+              className="border px-3 py-2 rounded text-black w-full sm:w-auto"
               required
             />
             <input
               type="time"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="border px-3 py-2 rounded text-black"
+              className="border px-3 py-2 rounded text-black w-full sm:w-auto"
               required
             />
             <button
@@ -253,16 +231,17 @@ const AdminPanel = () => {
               {language === "en" ? "Add" : "إضافة"}
             </button>
           </form>
+
           <div className="mt-4 space-y-2">
             {slots.map((slot) => (
               <div
                 key={slot._id}
-                className="flex justify-between bg-white p-3 rounded shadow"
+                className="flex flex-col sm:flex-row justify-between bg-white p-3 rounded shadow text-black"
               >
-                <span>{slot.slot}</span>
+                <span className="text-black">{slot.slot}</span>
                 <button
                   onClick={() => handleDeleteSlot(slot._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded"
+                  className="bg-red-500 text-white px-3 py-1 rounded mt-2 sm:mt-0"
                 >
                   {language === "en" ? "Delete" : "حذف"}
                 </button>
@@ -271,7 +250,7 @@ const AdminPanel = () => {
           </div>
         </section>
 
-        {/* Add Announcement */}
+        {/* Announcements */}
         <section>
           <h2 className="text-xl font-semibold mb-2 text-black">
             {language === "en" ? "Post Announcement" : "إضافة إعلان"}
@@ -356,9 +335,7 @@ const AdminPanel = () => {
                         const file = e.target.files[0];
                         const updated = [...announcements];
                         updated[index].file = file;
-                        updated[index].mediaType = file?.type.startsWith(
-                          "image"
-                        )
+                        updated[index].mediaType = file?.type.startsWith("image")
                           ? "image"
                           : "video";
                         setAnnouncements(updated);
@@ -383,9 +360,7 @@ const AdminPanel = () => {
                   </>
                 ) : (
                   <>
-                    <h3 className="text-lg font-bold text-black">
-                      {ann.title}
-                    </h3>
+                    <h3 className="text-lg font-bold text-black">{ann.title}</h3>
                     <p className="text-sm mb-2 text-black">{ann.description}</p>
                     {ann.mediaType === "image" && ann.mediaUrl && (
                       <img
@@ -399,8 +374,7 @@ const AdminPanel = () => {
                         <source src={ann.mediaUrl} />
                       </video>
                     )}
-
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <button
                         onClick={() => {
                           const updated = [...announcements];
