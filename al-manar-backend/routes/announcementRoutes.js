@@ -66,8 +66,10 @@ router.post("/", upload.single("media"), async (req, res) => {
 });
 
 // ✅ Get all announcements
+
 router.get("/", async (req, res) => {
   try {
+    res.set("Cache-Control", "no-store"); // prevent Vercel from caching
     const announcements = await Announcement.find();
     res.json(announcements);
   } catch (err) {

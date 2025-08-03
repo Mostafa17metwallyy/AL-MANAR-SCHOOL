@@ -17,7 +17,7 @@ const AdminPanel = () => {
     file: null,
   });
   const [announcements, setAnnouncements] = useState([]);
-  const BASE = process.env.NEXT_PUBLIC_API_BASE ;
+  const BASE = process.env.NEXT_PUBLIC_API_BASE;
 
   useEffect(() => {
     const isAdmin = localStorage.getItem("isAdmin");
@@ -119,8 +119,28 @@ const AdminPanel = () => {
   };
 
   const handleDeleteAnnouncement = async (id) => {
-    await fetch(`${BASE}/api/announcements/${id}`, { method: "DELETE" });
-    setAnnouncements((prev) => prev.filter((a) => a._id !== id));
+    const res = await fetch(`${BASE}/api/announcements/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) {
+      alert("Delete failed");
+      return;
+    }
+
+    // ✅ Re-fetch updated list from server after deletion
+    try {
+      const updatedRes = await fetch(`${BASE}/api/announcements`);
+      const updatedData = await updatedRes.json();
+
+      if (Array.isArray(updatedData)) {
+        setAnnouncements(updatedData.map((a) => ({ ...a, editing: false })));
+      } else {
+        console.error("❌ Failed to reload announcements:", updatedData);
+      }
+    } catch (err) {
+      console.error("❌ Re-fetch failed:", err);
+    }
   };
 
   const handleSaveAnnouncement = async (index) => {
