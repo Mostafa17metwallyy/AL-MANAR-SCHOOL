@@ -14,7 +14,7 @@ const app = express();
 
 // ✅ Allow requests from frontend
 const allowedOrigins = [
-  'https://al-manar-school.vercel.app',  // your frontend
+  'https://al-manar-school-frontend.vercel.app',  // your frontend
   'http://localhost:3000'                // dev (optional)
 ];
 
