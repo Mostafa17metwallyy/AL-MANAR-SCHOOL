@@ -1,23 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { useLanguage } from "./LanguageContext"; // ✅ Import language context
+import { useLanguage } from "./LanguageContext";
 
 const AnnouncementSection = () => {
   const [announcements, setAnnouncements] = useState([]);
-  const { language } = useLanguage(); // ✅ Get current language
+  const { language } = useLanguage();
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/announcements`, {
-      cache: "no-store", // ✅ Prevent caching to ensure fresh data
-    })
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/announcements`)
       .then((res) => res.json())
-      .then(setAnnouncements)
-      .catch(() => setAnnouncements([]));
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAnnouncements(data);
+        } else {
+          console.error("❌ Invalid announcement response:", data);
+          setAnnouncements([]);
+        }
+      })
+      .catch((err) => {
+        console.error("❌ Failed to fetch announcements:", err);
+        setAnnouncements([]);
+      });
   }, []);
 
   return (
     <section className="min-h-screen bg-gradient-to-b from-white to-slate-100 pt-32 pb-20 px-4 flex items-center justify-center">
       <div className="max-w-7xl w-full">
-        {/* ✅ Section Heading */}
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-teal-700 whitespace-nowrap">
             {language === "en" ? "Announcements" : "الإعلانات"}
@@ -29,7 +36,6 @@ const AnnouncementSection = () => {
           </p>
         </div>
 
-        {/* ✅ Empty State */}
         {announcements.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center text-gray-500 text-lg mt-20 animate-pulse">
             <p className="text-xl font-semibold text-gray-600">
@@ -44,7 +50,6 @@ const AnnouncementSection = () => {
             </p>
           </div>
         ) : (
-          // ✅ Announcements Grid
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {announcements.map((ann, index) => (
               <div
@@ -57,7 +62,6 @@ const AnnouncementSection = () => {
                   </h3>
                   <p className="text-gray-700 mb-3">{ann.description}</p>
 
-                  {/* ✅ Media Rendering */}
                   {ann.mediaType === "image" && ann.mediaUrl && (
                     <img
                       src={ann.mediaUrl}
