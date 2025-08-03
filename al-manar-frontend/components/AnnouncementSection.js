@@ -6,7 +6,9 @@ const AnnouncementSection = () => {
   const { language } = useLanguage(); // ✅ Get current language
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/announcements`)
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/announcements`, {
+      cache: "no-store", // ✅ Prevent caching to ensure fresh data
+    })
       .then((res) => res.json())
       .then(setAnnouncements)
       .catch(() => setAnnouncements([]));
@@ -42,7 +44,7 @@ const AnnouncementSection = () => {
             </p>
           </div>
         ) : (
-          /* ✅ Announcements Grid */
+          // ✅ Announcements Grid
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {announcements.map((ann, index) => (
               <div
