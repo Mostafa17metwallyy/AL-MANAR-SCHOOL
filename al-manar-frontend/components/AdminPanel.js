@@ -17,7 +17,7 @@ const AdminPanel = () => {
     file: null,
   });
   const [announcements, setAnnouncements] = useState([]);
-  const BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000";
+  const BASE = process.env.NEXT_PUBLIC_API_BASE ;
 
   useEffect(() => {
     const isAdmin = localStorage.getItem("isAdmin");

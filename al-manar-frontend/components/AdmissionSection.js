@@ -16,7 +16,7 @@ const AdmissionSection = () => {
   const { language } = useLanguage(); // ✅ Get current language
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/timeslots")
+    fetch("https://al-manar-school.vercel.app/api/timeslots")
       .then((res) => res.json())
       .then((data) => {
         console.log("Fetched time slots:", data);
