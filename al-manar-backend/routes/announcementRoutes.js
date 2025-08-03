@@ -1,13 +1,30 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const fs = require("fs");
-const path = require("path");
+const streamifier = require("streamifier");
 const Announcement = require("../models/Announcement");
-const cloudinary = require("../utils/cloudinary");
+const { v2: cloudinary } = require("../utils/cloudinary");
 
-// Use temporary storage (no custom filename needed)
-const upload = multer({ dest: "uploads/" });
+// ✅ Use memory storage (no disk write)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
+// Helper to stream upload to Cloudinary
+const uploadToCloudinary = (fileBuffer, folder) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: "auto",
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+    streamifier.createReadStream(fileBuffer).pipe(stream);
+  });
+};
 
 // ✅ Create announcement
 router.post("/", upload.single("media"), async (req, res) => {
@@ -18,15 +35,9 @@ router.post("/", upload.single("media"), async (req, res) => {
     let publicId = "";
 
     if (req.file) {
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "announcements",
-        resource_type: "auto",
-      });
-
+      const result = await uploadToCloudinary(req.file.buffer, "announcements");
       mediaUrl = result.secure_url;
       publicId = result.public_id;
-
-      fs.unlinkSync(req.file.path); // clean up temp file
     }
 
     const newAnnouncement = new Announcement({
@@ -34,7 +45,7 @@ router.post("/", upload.single("media"), async (req, res) => {
       description,
       mediaUrl,
       mediaType,
-      publicId, // ✅ Save publicId for future deletion
+      publicId,
     });
 
     await newAnnouncement.save();
@@ -64,22 +75,15 @@ router.put("/:id", upload.single("media"), async (req, res) => {
     const announcement = await Announcement.findById(req.params.id);
 
     if (req.file) {
-      // Optional: delete previous media from Cloudinary
       if (announcement?.publicId) {
         await cloudinary.uploader.destroy(announcement.publicId, {
           resource_type: "auto",
         });
       }
 
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "announcements",
-        resource_type: "auto",
-      });
-
+      const result = await uploadToCloudinary(req.file.buffer, "announcements");
       updateData.mediaUrl = result.secure_url;
       updateData.publicId = result.public_id;
-
-      fs.unlinkSync(req.file.path);
     }
 
     const updated = await Announcement.findByIdAndUpdate(req.params.id, updateData, {
@@ -102,7 +106,6 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ error: "Announcement not found" });
     }
 
-    // ✅ Delete from Cloudinary
     if (announcement.publicId) {
       await cloudinary.uploader.destroy(announcement.publicId, {
         resource_type: "auto",
