@@ -1,14 +1,32 @@
-import Footer from '@/components/Footer';
-import Navbar from '@/components/NavBar';
-import '@/styles/globals.css';
-import { LanguageProvider } from '@/components/LanguageContext';
+import { useEffect } from "react";
+import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
+import Navbar from "@/components/NavBar";
+import Footer from "@/components/Footer";
+import "@/styles/globals.css";
+import { Toaster } from "react-hot-toast";
 
-function MyApp({ Component, pageProps }) {
+function AppWithDir({ Component, pageProps }) {
+  const { language } = useLanguage();
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
+  }, [language]);
+
   return (
-    <LanguageProvider>
+    <>
       <Navbar />
       <Component {...pageProps} />
       <Footer />
+    </>
+  );
+}
+
+function MyApp(props) {
+  return (
+    <LanguageProvider>
+      <Toaster position="top-center" />
+      <AppWithDir {...props} />
     </LanguageProvider>
   );
 }

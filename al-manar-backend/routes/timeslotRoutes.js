@@ -5,8 +5,8 @@ const dayjs = require('dayjs');
 const customParseFormat = require('dayjs/plugin/customParseFormat');
 dayjs.extend(customParseFormat);
 
-// ✅ Fix slot generation
-function generateOneHourSlots(startStr, endStr) {
+// ✅ Updated to generate 15-minute intervals
+function generateFifteenMinuteSlots(startStr, endStr) {
   const start = dayjs(startStr, 'HH:mm');
   const end = dayjs(endStr, 'HH:mm');
 
@@ -18,7 +18,7 @@ function generateOneHourSlots(startStr, endStr) {
   let current = start;
 
   while (current.isBefore(end)) {
-    const next = current.add(1, 'hour');
+    const next = current.add(15, 'minute');
     if (next.isAfter(end)) break;
     slots.push(`${current.format('h:mm A')} - ${next.format('h:mm A')}`);
     current = next;
@@ -32,10 +32,10 @@ router.post('/', async (req, res) => {
     const { start, end } = req.body;
     if (!start || !end) return res.status(400).json({ error: 'Start and end time required' });
 
-    const oneHourSlots = generateOneHourSlots(start, end);
-    if (oneHourSlots.length === 0) return res.status(400).json({ error: 'Invalid time range' });
+    const slots = generateFifteenMinuteSlots(start, end);
+    if (slots.length === 0) return res.status(400).json({ error: 'Invalid time range' });
 
-    const created = await Promise.all(oneHourSlots.map(s => new TimeSlot({ slot: s }).save()));
+    const created = await Promise.all(slots.map(s => new TimeSlot({ slot: s }).save()));
     res.status(201).json(created);
   } catch (err) {
     console.error('❌ Error creating slots:', err);
@@ -75,5 +75,5 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to delete' });
   }
 });
-  
+
 module.exports = router;

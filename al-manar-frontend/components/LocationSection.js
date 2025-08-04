@@ -1,12 +1,19 @@
 import React from "react";
+import { useLanguage } from "./LanguageContext"; // Make sure the path is correct
 
 const LocationSection = () => {
+  const { language } = useLanguage();
+
   return (
     <section className="bg-white py-16 px-4" id="location">
       <div className="max-w-6xl mx-auto text-center">
-        <h2 className="text-teal-600 font-bold text-xl mb-2">Our Location</h2>
+        <h2 className="text-teal-600 font-bold text-xl mb-2">
+          {language === "en" ? "Our Location" : "موقعنا"}
+        </h2>
         <p className="text-gray-700 mb-6 text-lg font-semibold">
-          Visit Al Manar Islamic Language Nursery on the map below
+          {language === "en"
+            ? "Visit Al Manar Islamic Language Nursery on the map below"
+            : "قم بزيارة حضانة المنار الإسلامية للغات "}
         </p>
 
         <div className="w-full h-96 rounded-lg overflow-hidden shadow-lg">

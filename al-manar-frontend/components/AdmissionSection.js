@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useLanguage } from "./LanguageContext"; // Adjust the path if needed
+import { useLanguage } from "./LanguageContext"; // adjust path if needed
+import toast from "react-hot-toast";
 
 const AdmissionSection = () => {
   const [form, setForm] = useState({
@@ -18,22 +19,20 @@ const AdmissionSection = () => {
 
   useEffect(() => {
     fetch(`${BASE}/api/timeslots`)
-      .then(async (res) => {
-        if (!res.ok) {
-          const err = await res.json();
-          console.error("🚨 Error fetching slots:", err);
-          return;
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setAvailableSlots(data.slots || data || []);
-      })
+      .then((res) => res.json())
+      .then((data) => setAvailableSlots(data.slots || data || []))
       .catch((err) => {
         console.error("Failed to fetch slots:", err);
         setAvailableSlots([]);
       });
   }, []);
+
+  const isOlderThan3Years = (dateStr) => {
+    const birthDate = new Date(dateStr);
+    const threeYearsAgo = new Date();
+    threeYearsAgo.setFullYear(threeYearsAgo.getFullYear() - 3);
+    return birthDate <= threeYearsAgo;
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -41,6 +40,23 @@ const AdmissionSection = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ✅ Manual validation
+    for (let field in form) {
+      if (!form[field]) {
+        toast.error(language === "en" ? "Please fill all fields." : "يرجى ملء جميع الحقول.");
+        return;
+      }
+    }
+
+    if (!isOlderThan3Years(form.birthDate)) {
+      toast.error(
+        language === "en"
+          ? "Child must be at least 3 years old."
+          : "يجب أن يكون عمر الطفل 3 سنوات على الأقل."
+      );
+      return;
+    }
 
     try {
       const admissionRes = await fetch(`${BASE}/api/admission`, {
@@ -52,14 +68,15 @@ const AdmissionSection = () => {
       const resJson = await admissionRes.json();
 
       if (!admissionRes.ok) {
-        return alert(
+        toast.error(
           language === "en"
-            ? "Form error: " + resJson.error
-            : "خطأ في النموذج: " + resJson.error
+            ? "Submission error: " + resJson.error
+            : "خطأ في الإرسال: " + resJson.error
         );
+        return;
       }
 
-      alert(
+      toast.success(
         language === "en"
           ? "Form submitted and slot reserved!"
           : "تم إرسال النموذج وحجز الموعد بنجاح!"
@@ -76,12 +93,17 @@ const AdmissionSection = () => {
       });
     } catch (err) {
       console.error(err);
-      alert(
+      toast.error(
         language === "en"
           ? "Server error. Please try again later."
           : "حدث خطأ في الخادم. حاول مرة أخرى لاحقاً."
       );
     }
+  };
+
+  const yearOptions = {
+    en: ["KG", "Primary", "Preparatory", "Secondary"],
+    ar: ["كجم", "ابتدائي", "إعدادي", "ثانوي"],
   };
 
   const labelText = {
@@ -109,43 +131,67 @@ const AdmissionSection = () => {
         onSubmit={handleSubmit}
         className="max-w-lg mx-auto px-6 space-y-6 text-black"
       >
-        {["firstName", "lastName", "email", "birthDate", "year"].map(
-          (field, i) => (
-            <div key={i}>
-              <label className="block text-base font-medium mb-2">
-                {labelText[field]}
-              </label>
-              <input
-                type={field === "birthDate" ? "date" : "text"}
-                name={field}
-                value={form[field]}
-                onChange={handleChange}
-                placeholder={
-                  language === "en"
-                    ? `Enter your ${
-                        field === "year"
-                          ? "grade"
-                          : field.replace(/([A-Z])/g, " $1").toLowerCase()
-                      }...`
-                    : `أدخل ${
-                        field === "year"
-                          ? "الصف الدراسي"
-                          : field === "email"
-                          ? "البريد الإلكتروني"
-                          : field === "birthDate"
-                          ? "تاريخ الميلاد"
-                          : field === "firstName"
-                          ? "الاسم الأول"
-                          : "اسم العائلة"
-                      }...`
-                }
-                className="w-full border border-gray-300 rounded px-4 py-3 text-base text-black placeholder:text-gray-700"
-                required
-              />
-            </div>
-          )
-        )}
+        {["firstName", "lastName", "email", "birthDate"].map((field, i) => (
+          <div key={i}>
+            <label className="block text-base font-medium mb-2">
+              {labelText[field]}
+            </label>
+            <input
+              type={field === "birthDate" ? "date" : "text"}
+              name={field}
+              value={form[field]}
+              onChange={handleChange}
+              placeholder={
+                language === "en"
+                  ? `Enter your ${
+                      field === "email"
+                        ? "email"
+                        : field === "firstName"
+                        ? "first name"
+                        : field === "lastName"
+                        ? "last name"
+                        : "birth date"
+                    }...`
+                  : `أدخل ${
+                      field === "email"
+                        ? "البريد الإلكتروني"
+                        : field === "firstName"
+                        ? "الاسم الأول"
+                        : field === "lastName"
+                        ? "اسم العائلة"
+                        : "تاريخ الميلاد"
+                    }...`
+              }
+              className="w-full border border-gray-300 rounded px-4 py-3 text-base placeholder:text-gray-700"
+              required
+            />
+          </div>
+        ))}
 
+        {/* Academic Year Dropdown */}
+        <div>
+          <label className="block text-base font-medium mb-2">
+            {labelText.year}
+          </label>
+          <select
+            name="year"
+            value={form.year}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded px-4 py-3 text-base bg-white"
+            required
+          >
+            <option value="" hidden>
+              {language === "en" ? "Select year" : "اختر العام"}
+            </option>
+            {yearOptions[language].map((yearLabel, idx) => (
+              <option key={idx} value={yearLabel}>
+                {yearLabel}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Division Dropdown */}
         <div>
           <label className="block text-base font-medium mb-2">
             {language === "en" ? "Division*" : "القسم*"}
@@ -154,14 +200,14 @@ const AdmissionSection = () => {
             name="division"
             value={form.division}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-4 py-3 text-base text-black bg-white"
+            className="w-full border border-gray-300 rounded px-4 py-3 text-base bg-white"
             required
           >
-            <option value="" disabled hidden>
+            <option value="" hidden>
               {language === "en" ? "Select division" : "اختر القسم"}
             </option>
             <option value="National Division">
-              {language === "en" ? "National Division" : "القسم الوطني"}
+              {language === "en" ? "National Division" : "القسم اللغات"}
             </option>
             <option value="Arabic Division">
               {language === "en" ? "Arabic Division" : "القسم العربي"}
@@ -169,6 +215,7 @@ const AdmissionSection = () => {
           </select>
         </div>
 
+        {/* Time Slot Dropdown */}
         <div>
           <label className="block text-base font-medium mb-2">
             {language === "en"
@@ -179,13 +226,13 @@ const AdmissionSection = () => {
             name="selectedSlot"
             value={form.selectedSlot}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-4 py-3 text-base text-black bg-white"
+            className="w-full border border-gray-300 rounded px-4 py-3 text-base bg-white"
             required
           >
-            <option value="" disabled hidden>
+            <option value="" hidden>
               {language === "en" ? "Select a slot" : "اختر موعداً"}
             </option>
-            {Array.isArray(availableSlots) && availableSlots.length > 0 ? (
+            {availableSlots.length > 0 ? (
               availableSlots.map((slot) => (
                 <option key={slot._id} value={slot._id}>
                   {slot.slot}
@@ -201,6 +248,7 @@ const AdmissionSection = () => {
           </select>
         </div>
 
+        {/* Submit Button */}
         <div className="text-center pt-6">
           <button
             type="submit"

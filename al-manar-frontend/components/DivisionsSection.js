@@ -10,7 +10,7 @@ const DivisionsSection = () => {
   const divisions = [
     {
       title:
-        language === "en" ? "National Division" : "القسم الوطني",
+        language === "en" ? "National Division" : "القسم اللغات",
       image: "/assets/3.jpg",
       description:
         language === "en"
