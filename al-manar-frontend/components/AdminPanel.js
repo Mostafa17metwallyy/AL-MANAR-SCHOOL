@@ -99,7 +99,8 @@ const AdminPanel = () => {
       });
 
       const newAnn = await res.json();
-      if (!res.ok || !newAnn._id) return alert("Failed to create announcement.");
+      if (!res.ok || !newAnn._id)
+        return alert("Failed to create announcement.");
 
       setAnnouncements((prev) => [...prev, { ...newAnn, editing: false }]);
       setAnnouncement({
@@ -172,17 +173,30 @@ const AdminPanel = () => {
             <table className="min-w-full bg-white rounded shadow text-black">
               <thead className="bg-teal-600 text-white">
                 <tr>
-                  <th className="px-4 py-2">{language === "en" ? "Name" : "الاسم"}</th>
+                  <th className="px-4 py-2">
+                    {language === "en" ? "Name" : "الاسم"}
+                  </th>
                   <th className="px-4 py-2">Email</th>
-                  <th className="px-4 py-2">{language === "en" ? "Division" : "القسم"}</th>
-                  <th className="px-4 py-2">{language === "en" ? "Slot" : "الميعاد"}</th>
-                  <th className="px-4 py-2">{language === "en" ? "Actions" : "إجراءات"}</th>
+                  <th className="px-4 py-2">
+                    {language === "en" ? "Division" : "القسم"}
+                  </th>
+                  <th className="px-4 py-2">
+                    {language === "en" ? "Year" : "الصف"}
+                  </th>
+                  <th className="px-4 py-2">
+                    {language === "en" ? "Slot" : "الميعاد"}
+                  </th>
+                  <th className="px-4 py-2">
+                    {language === "en" ? "Actions" : "إجراءات"}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {admissions.map((a, i) => (
                   <tr key={i} className="even:bg-gray-50">
-                    <td className="px-4 py-2">{a.firstName} {a.lastName}</td>
+                    <td className="px-4 py-2">
+                      {a.firstName} {a.lastName}
+                    </td>
                     <td className="px-4 py-2">{a.email}</td>
                     <td className="px-4 py-2">{a.division}</td>
                     <td className="px-4 py-2">{a.timeSlot}</td>
@@ -335,7 +349,9 @@ const AdminPanel = () => {
                         const file = e.target.files[0];
                         const updated = [...announcements];
                         updated[index].file = file;
-                        updated[index].mediaType = file?.type.startsWith("image")
+                        updated[index].mediaType = file?.type.startsWith(
+                          "image"
+                        )
                           ? "image"
                           : "video";
                         setAnnouncements(updated);
@@ -360,7 +376,9 @@ const AdminPanel = () => {
                   </>
                 ) : (
                   <>
-                    <h3 className="text-lg font-bold text-black">{ann.title}</h3>
+                    <h3 className="text-lg font-bold text-black">
+                      {ann.title}
+                    </h3>
                     <p className="text-sm mb-2 text-black">{ann.description}</p>
                     {ann.mediaType === "image" && ann.mediaUrl && (
                       <img
