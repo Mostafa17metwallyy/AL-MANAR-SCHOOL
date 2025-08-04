@@ -199,7 +199,9 @@ const AdminPanel = () => {
                     </td>
                     <td className="px-4 py-2">{a.email}</td>
                     <td className="px-4 py-2">{a.division}</td>
-                    <td className="px-4 py-2">{a.timeSlot}</td>
+                    <td className="px-4 py-2">{a.year}</td>{" "}
+                    {/* ✅ Academic year */}
+                    <td className="px-4 py-2">{a.timeSlot}</td> {/* ✅ Slot */}
                     <td className="px-4 py-2">
                       <button
                         onClick={() => handleDeleteAdmission(a._id)}
