@@ -5,8 +5,8 @@ const announcementSchema = new mongoose.Schema({
   description: String,
   mediaUrl: String,
   mediaType: String,
-  publicId: String, // ✅ Add this
+  publicId: String,
   createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Announcement', announcementSchema);
+module.exports = mongoose.models.Announcement || mongoose.model('Announcement', announcementSchema);

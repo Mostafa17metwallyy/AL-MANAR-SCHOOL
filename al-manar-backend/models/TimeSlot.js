@@ -6,4 +6,4 @@ const timeSlotSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('TimeSlot', timeSlotSchema);
+module.exports = mongoose.models.TimeSlot || mongoose.model('TimeSlot', timeSlotSchema);

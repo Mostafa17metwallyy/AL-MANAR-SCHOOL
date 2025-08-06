@@ -11,4 +11,4 @@ const admissionSchema = new mongoose.Schema({
   submittedAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Admission', admissionSchema);
+module.exports = mongoose.models.Admission || mongoose.model('Admission', admissionSchema);
