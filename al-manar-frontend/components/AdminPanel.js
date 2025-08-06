@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { useLanguage } from "./LanguageContext"; // Adjust the path if needed
+import { useLanguage } from "./LanguageContext"; // Adjust path if needed
+import toast, { Toaster } from "react-hot-toast";
 
 const AdminPanel = () => {
   const router = useRouter();
   const { language } = useLanguage();
+  const BASE = process.env.NEXT_PUBLIC_API_BASE;
 
   const [admissions, setAdmissions] = useState([]);
   const [slots, setSlots] = useState([]);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [loading, setLoading] = useState(false);
   const [announcement, setAnnouncement] = useState({
     title: "",
     description: "",
@@ -17,13 +20,10 @@ const AdminPanel = () => {
     file: null,
   });
   const [announcements, setAnnouncements] = useState([]);
-  const BASE = process.env.NEXT_PUBLIC_API_BASE;
 
   useEffect(() => {
     const isAdmin = localStorage.getItem("isAdmin");
-    if (isAdmin !== "true") {
-      router.push("/login");
-    }
+    if (isAdmin !== "true") router.push("/login");
 
     fetch(`${BASE}/api/admission`)
       .then((res) => res.json())
@@ -52,7 +52,8 @@ const AdminPanel = () => {
 
   const handleSlotSubmit = async (e) => {
     e.preventDefault();
-    if (!startTime || !endTime) return alert("Start and end time required");
+    if (!startTime || !endTime) return toast.error("Start and end time required");
+    setLoading(true);
 
     try {
       const res = await fetch(`${BASE}/api/timeslots`, {
@@ -61,27 +62,39 @@ const AdminPanel = () => {
         body: JSON.stringify({ start: startTime, end: endTime }),
       });
       const data = await res.json();
-      if (!res.ok) return alert(data.error || "Slot creation failed");
+
+      if (!res.ok) return toast.error(data.error || "Slot creation failed");
 
       setSlots((prev) => [...prev, ...(Array.isArray(data) ? data : [data])]);
       setStartTime("");
       setEndTime("");
+      toast.success("Time slot added!");
     } catch {
-      alert("Server error while creating slots");
+      toast.error("Server error while creating slots");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteSlot = async (id) => {
-    await fetch(`${BASE}/api/timeslots/${id}`, { method: "DELETE" });
-    setSlots((prev) => prev.filter((s) => s._id !== id));
+    try {
+      await fetch(`${BASE}/api/timeslots/${id}`, { method: "DELETE" });
+      setSlots((prev) => prev.filter((s) => s._id !== id));
+      toast.success("Slot deleted");
+    } catch {
+      toast.error("Error deleting slot");
+    }
   };
 
   const handleDeleteAdmission = async (id) => {
-    const res = await fetch(`${BASE}/api/admission/${id}`, {
-      method: "DELETE",
-    });
-    if (!res.ok) return alert("Delete failed");
-    setAdmissions((prev) => prev.filter((a) => a._id !== id));
+    try {
+      const res = await fetch(`${BASE}/api/admission/${id}`, { method: "DELETE" });
+      if (!res.ok) return toast.error("Delete failed");
+      setAdmissions((prev) => prev.filter((a) => a._id !== id));
+      toast.success("Admission deleted");
+    } catch {
+      toast.error("Error deleting admission");
+    }
   };
 
   const handleAnnouncementSubmit = async (e) => {
@@ -92,6 +105,7 @@ const AdminPanel = () => {
     formData.append("mediaType", announcement.mediaType);
     if (announcement.file) formData.append("media", announcement.file);
 
+    setLoading(true);
     try {
       const res = await fetch(`${BASE}/api/announcements`, {
         method: "POST",
@@ -99,32 +113,32 @@ const AdminPanel = () => {
       });
 
       const newAnn = await res.json();
-      if (!res.ok || !newAnn._id)
-        return alert("Failed to create announcement.");
+      if (!res.ok || !newAnn._id) return toast.error("Failed to post announcement.");
 
       setAnnouncements((prev) => [...prev, { ...newAnn, editing: false }]);
-      setAnnouncement({
-        title: "",
-        description: "",
-        mediaType: "text",
-        file: null,
-      });
+      setAnnouncement({ title: "", description: "", mediaType: "text", file: null });
+      toast.success("Announcement posted");
     } catch {
-      alert("Server error");
+      toast.error("Server error");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteAnnouncement = async (id) => {
-    const res = await fetch(`${BASE}/api/announcements/${id}`, {
-      method: "DELETE",
-    });
-    if (!res.ok) return alert("Delete failed");
+    try {
+      const res = await fetch(`${BASE}/api/announcements/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) return toast.error("Delete failed");
 
-    const updated = await fetch(`${BASE}/api/announcements`).then((r) =>
-      r.json()
-    );
-    if (Array.isArray(updated)) {
-      setAnnouncements(updated.map((a) => ({ ...a, editing: false })));
+      const updated = await fetch(`${BASE}/api/announcements`).then((r) => r.json());
+      if (Array.isArray(updated)) {
+        setAnnouncements(updated.map((a) => ({ ...a, editing: false })));
+        toast.success("Announcement deleted");
+      }
+    } catch {
+      toast.error("Server error");
     }
   };
 
@@ -136,22 +150,27 @@ const AdminPanel = () => {
     formData.append("mediaType", ann.mediaType);
     if (ann.file) formData.append("media", ann.file);
 
-    const res = await fetch(`${BASE}/api/announcements/${ann._id}`, {
-      method: "PUT",
-      body: formData,
-    });
-    const updated = await res.json();
-    const updatedList = [...announcements];
-    updatedList[index] = { ...updated, editing: false };
-    setAnnouncements(updatedList);
+    setLoading(true);
+    try {
+      const res = await fetch(`${BASE}/api/announcements/${ann._id}`, {
+        method: "PUT",
+        body: formData,
+      });
+      const updated = await res.json();
+      const updatedList = [...announcements];
+      updatedList[index] = { ...updated, editing: false };
+      setAnnouncements(updatedList);
+      toast.success("Announcement updated");
+    } catch {
+      toast.error("Error saving changes");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div
-      className="min-h-screen bg-gray-100 p-6"
-      dir={language === "ar" ? "rtl" : "ltr"}
-    >
-      {/* Logout */}
+    <div className="min-h-screen bg-gray-100 p-6" dir={language === "ar" ? "rtl" : "ltr"}>
+      <Toaster position="top-right" />
       <button
         onClick={handleLogout}
         className="fixed top-6 right-6 bg-red-600 text-white px-4 py-2 rounded z-50 shadow-md"
@@ -173,35 +192,22 @@ const AdminPanel = () => {
             <table className="min-w-full bg-white rounded shadow text-black">
               <thead className="bg-teal-600 text-white">
                 <tr>
-                  <th className="px-4 py-2">
-                    {language === "en" ? "Name" : "الاسم"}
-                  </th>
+                  <th className="px-4 py-2">{language === "en" ? "Name" : "الاسم"}</th>
                   <th className="px-4 py-2">Email</th>
-                  <th className="px-4 py-2">
-                    {language === "en" ? "Division" : "القسم"}
-                  </th>
-                  <th className="px-4 py-2">
-                    {language === "en" ? "Year" : "الصف"}
-                  </th>
-                  <th className="px-4 py-2">
-                    {language === "en" ? "Slot" : "الميعاد"}
-                  </th>
-                  <th className="px-4 py-2">
-                    {language === "en" ? "Actions" : "إجراءات"}
-                  </th>
+                  <th className="px-4 py-2">{language === "en" ? "Division" : "القسم"}</th>
+                  <th className="px-4 py-2">{language === "en" ? "Year" : "الصف"}</th>
+                  <th className="px-4 py-2">{language === "en" ? "Slot" : "الميعاد"}</th>
+                  <th className="px-4 py-2">{language === "en" ? "Actions" : "إجراءات"}</th>
                 </tr>
               </thead>
               <tbody>
                 {admissions.map((a, i) => (
                   <tr key={i} className="even:bg-gray-50">
-                    <td className="px-4 py-2">
-                      {a.firstName} {a.lastName}
-                    </td>
+                    <td className="px-4 py-2">{a.firstName} {a.lastName}</td>
                     <td className="px-4 py-2">{a.email}</td>
                     <td className="px-4 py-2">{a.division}</td>
-                    <td className="px-4 py-2">{a.year}</td>{" "}
-                    {/* ✅ Academic year */}
-                    <td className="px-4 py-2">{a.timeSlot}</td> {/* ✅ Slot */}
+                    <td className="px-4 py-2">{a.year}</td>
+                    <td className="px-4 py-2">{a.timeSlot}</td>
                     <td className="px-4 py-2">
                       <button
                         onClick={() => handleDeleteAdmission(a._id)}
@@ -217,48 +223,28 @@ const AdminPanel = () => {
           </div>
         </section>
 
-        {/* Slots */}
+        {/* Add Time Slot */}
         <section>
           <h2 className="text-xl font-semibold mb-2 text-black">
             {language === "en" ? "Add Time Slot" : "إضافة موعد"}
           </h2>
-          <form
-            onSubmit={handleSlotSubmit}
-            className="flex flex-col sm:flex-row gap-3 items-start sm:items-center"
-          >
-            <input
-              type="time"
-              value={startTime}
-              onChange={(e) => setStartTime(e.target.value)}
-              className="border px-3 py-2 rounded text-black w-full sm:w-auto"
-              required
-            />
-            <input
-              type="time"
-              value={endTime}
-              onChange={(e) => setEndTime(e.target.value)}
-              className="border px-3 py-2 rounded text-black w-full sm:w-auto"
-              required
-            />
+          <form onSubmit={handleSlotSubmit} className="flex flex-col sm:flex-row gap-3">
+            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="border px-3 py-2 rounded text-black w-full sm:w-auto" required />
+            <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="border px-3 py-2 rounded text-black w-full sm:w-auto" required />
             <button
               type="submit"
-              className="bg-teal-600 text-white px-4 py-2 rounded"
+              disabled={loading}
+              className={`bg-teal-600 text-white px-4 py-2 rounded ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              {language === "en" ? "Add" : "إضافة"}
+              {loading ? "Loading..." : language === "en" ? "Add" : "إضافة"}
             </button>
           </form>
 
           <div className="mt-4 space-y-2">
             {slots.map((slot) => (
-              <div
-                key={slot._id}
-                className="flex flex-col sm:flex-row justify-between bg-white p-3 rounded shadow text-black"
-              >
-                <span className="text-black">{slot.slot}</span>
-                <button
-                  onClick={() => handleDeleteSlot(slot._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded mt-2 sm:mt-0"
-                >
+              <div key={slot._id} className="flex flex-col sm:flex-row justify-between bg-white p-3 rounded shadow text-black">
+                <span>{slot.slot}</span>
+                <button onClick={() => handleDeleteSlot(slot._id)} className="bg-red-500 text-white px-3 py-1 rounded mt-2 sm:mt-0">
                   {language === "en" ? "Delete" : "حذف"}
                 </button>
               </div>
@@ -272,52 +258,21 @@ const AdminPanel = () => {
             {language === "en" ? "Post Announcement" : "إضافة إعلان"}
           </h2>
           <form onSubmit={handleAnnouncementSubmit} className="space-y-3">
-            <input
-              type="text"
-              placeholder={language === "en" ? "Title" : "العنوان"}
-              value={announcement.title}
-              onChange={(e) =>
-                setAnnouncement({ ...announcement, title: e.target.value })
+            <input type="text" placeholder={language === "en" ? "Title" : "العنوان"} value={announcement.title} onChange={(e) => setAnnouncement({ ...announcement, title: e.target.value })} className="w-full border px-3 py-2 rounded text-black" required />
+            <textarea placeholder={language === "en" ? "Description" : "الوصف"} value={announcement.description} onChange={(e) => setAnnouncement({ ...announcement, description: e.target.value })} className="w-full border px-3 py-2 rounded text-black" required />
+            <input type="file" accept="image/*,video/*" onChange={(e) => {
+              const file = e.target.files[0];
+              if (file) {
+                const type = file.type.startsWith("image") ? "image" : "video";
+                setAnnouncement({ ...announcement, file, mediaType: type });
               }
-              className="w-full border px-3 py-2 rounded text-black"
-              required
-            />
-            <textarea
-              placeholder={language === "en" ? "Description" : "الوصف"}
-              value={announcement.description}
-              onChange={(e) =>
-                setAnnouncement({
-                  ...announcement,
-                  description: e.target.value,
-                })
-              }
-              className="w-full border px-3 py-2 rounded text-black"
-              required
-            />
-            <input
-              type="file"
-              accept="image/*,video/*"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  const type = file.type.startsWith("image")
-                    ? "image"
-                    : "video";
-                  setAnnouncement({ ...announcement, file, mediaType: type });
-                }
-              }}
-              className="w-full text-black"
-            />
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-6 py-2 rounded"
-            >
+            }} className="w-full text-black" />
+            <button type="submit" className="bg-teal-600 text-white px-6 py-2 rounded">
               {language === "en" ? "Post" : "نشر"}
             </button>
           </form>
         </section>
 
-        {/* Show Announcements */}
         <section>
           <h2 className="text-2xl font-semibold mb-4 text-black">
             {language === "en" ? "Announcements" : "الإعلانات"}
@@ -327,67 +282,40 @@ const AdminPanel = () => {
               <div key={ann._id} className="bg-white p-4 rounded shadow">
                 {ann.editing ? (
                   <>
-                    <input
-                      className="w-full border mb-2 px-2 py-1 text-black"
-                      value={ann.title}
-                      onChange={(e) => {
-                        const updated = [...announcements];
-                        updated[index].title = e.target.value;
-                        setAnnouncements(updated);
-                      }}
-                    />
-                    <textarea
-                      className="w-full border mb-2 px-2 py-1 text-black"
-                      value={ann.description}
-                      onChange={(e) => {
-                        const updated = [...announcements];
-                        updated[index].description = e.target.value;
-                        setAnnouncements(updated);
-                      }}
-                    />
-                    <input
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        const updated = [...announcements];
-                        updated[index].file = file;
-                        updated[index].mediaType = file?.type.startsWith(
-                          "image"
-                        )
-                          ? "image"
-                          : "video";
-                        setAnnouncements(updated);
-                      }}
-                    />
-                    <button
-                      onClick={() => handleSaveAnnouncement(index)}
-                      className="bg-green-600 text-white px-3 py-1 mr-2 rounded"
-                    >
+                    <input className="w-full border mb-2 px-2 py-1 text-black" value={ann.title} onChange={(e) => {
+                      const updated = [...announcements];
+                      updated[index].title = e.target.value;
+                      setAnnouncements(updated);
+                    }} />
+                    <textarea className="w-full border mb-2 px-2 py-1 text-black" value={ann.description} onChange={(e) => {
+                      const updated = [...announcements];
+                      updated[index].description = e.target.value;
+                      setAnnouncements(updated);
+                    }} />
+                    <input type="file" onChange={(e) => {
+                      const file = e.target.files[0];
+                      const updated = [...announcements];
+                      updated[index].file = file;
+                      updated[index].mediaType = file?.type.startsWith("image") ? "image" : "video";
+                      setAnnouncements(updated);
+                    }} />
+                    <button onClick={() => handleSaveAnnouncement(index)} className="bg-green-600 text-white px-3 py-1 mr-2 rounded">
                       {language === "en" ? "Save" : "حفظ"}
                     </button>
-                    <button
-                      onClick={() => {
-                        const updated = [...announcements];
-                        updated[index].editing = false;
-                        setAnnouncements(updated);
-                      }}
-                      className="bg-gray-400 text-white px-3 py-1 rounded"
-                    >
+                    <button onClick={() => {
+                      const updated = [...announcements];
+                      updated[index].editing = false;
+                      setAnnouncements(updated);
+                    }} className="bg-gray-400 text-white px-3 py-1 rounded">
                       {language === "en" ? "Cancel" : "إلغاء"}
                     </button>
                   </>
                 ) : (
                   <>
-                    <h3 className="text-lg font-bold text-black">
-                      {ann.title}
-                    </h3>
+                    <h3 className="text-lg font-bold text-black">{ann.title}</h3>
                     <p className="text-sm mb-2 text-black">{ann.description}</p>
                     {ann.mediaType === "image" && ann.mediaUrl && (
-                      <img
-                        src={ann.mediaUrl}
-                        className="w-full rounded mb-2"
-                        alt="announcement media"
-                      />
+                      <img src={ann.mediaUrl} className="w-full rounded mb-2" alt="announcement media" />
                     )}
                     {ann.mediaType === "video" && ann.mediaUrl && (
                       <video controls className="w-full rounded mb-2">
@@ -395,20 +323,14 @@ const AdminPanel = () => {
                       </video>
                     )}
                     <div className="flex gap-2 flex-wrap">
-                      <button
-                        onClick={() => {
-                          const updated = [...announcements];
-                          updated[index].editing = true;
-                          setAnnouncements(updated);
-                        }}
-                        className="bg-yellow-500 text-white px-3 py-1 rounded"
-                      >
+                      <button onClick={() => {
+                        const updated = [...announcements];
+                        updated[index].editing = true;
+                        setAnnouncements(updated);
+                      }} className="bg-yellow-500 text-white px-3 py-1 rounded">
                         {language === "en" ? "Edit" : "تعديل"}
                       </button>
-                      <button
-                        onClick={() => handleDeleteAnnouncement(ann._id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded"
-                      >
+                      <button onClick={() => handleDeleteAnnouncement(ann._id)} className="bg-red-500 text-white px-3 py-1 rounded">
                         {language === "en" ? "Delete" : "حذف"}
                       </button>
                     </div>
