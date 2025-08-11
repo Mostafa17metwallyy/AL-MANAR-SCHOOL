@@ -4,8 +4,9 @@
 require('dotenv').config();
 
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
+const mongoose = require('mongoose');
+const dbConnect = require('./lib/db'); // cached connector
 
 // Routes
 const admissionRoutes = require('./routes/admissionRoutes');
@@ -31,7 +32,7 @@ process.on('unhandledRejection', (reason) => {
 const allowedOrigins = [
   'https://elmanar.co',
   'https://www.elmanar.co',
-  'https://al-manar-school.vercel.app', // keep if you still use this
+  'https://al-manar-school.vercel.app', // backend host
   'http://localhost:3000',
 ];
 
@@ -59,52 +60,25 @@ app.use((req, _res, next) => {
 });
 
 /* =========================
-   Stable Mongo connection
-   (cached to avoid re-connect thrash)
+   Ensure Mongo is connected
+   (await cached connection per request)
 ========================= */
-let cached = global.__mongoose;
-if (!cached) cached = global.__mongoose = { conn: null, promise: null };
-
-async function dbConnect(uri) {
-  if (cached.conn) return cached.conn;
-  if (!cached.promise) {
-    cached.promise = mongoose
-      .connect(uri, {
-        maxPoolSize: 5,
-        serverSelectionTimeoutMS: 10000,
-      })
-      .then((m) => m)
-      .catch((e) => {
-        console.error('❌ Initial Mongo connect failed:', e);
-        throw e;
-      });
-  }
-  cached.conn = await cached.promise;
-  return cached.conn;
-}
-
-// Connect once at boot (non-blocking for route mounting)
-(async () => {
-  const uri = process.env.MONGO_URI;
-  if (!uri) {
-    console.error('❌ MONGO_URI is missing from environment variables.');
-    return;
-  }
-
-  // 🚨 IMPORTANT: make sure your URI ends with a fixed DB name (e.g., /almanar), not /test
-  if (/\/test(\?|$)/.test(uri)) {
-    console.warn('⚠️ You are using the default "test" database in MONGO_URI. Consider switching to a fixed DB name like /almanar.');
-  }
-
+app.use(async (req, res, next) => {
   try {
-    await dbConnect(uri);
-    console.log('🟢 Mongo connected');
+    const uri = process.env.MONGO_URI;
+    if (!uri) {
+      console.error('❌ MONGO_URI missing');
+      return res.status(500).json({ error: 'Database configuration missing' });
+    }
+    await dbConnect(uri); // cached; fast after first call
+    next();
   } catch (e) {
-    console.error('❌ Mongo connection error at startup:', e?.message || e);
+    console.error('❌ DB connect in middleware failed:', e?.message || e);
+    res.status(503).json({ error: 'Database not available' });
   }
-})();
+});
 
-// Optional: extra mongoose listeners (for visibility)
+// (Optional) connection event logs for visibility
 mongoose.connection.on('connected', () => console.log('🟢 Mongoose connected'));
 mongoose.connection.on('error', (err) => console.error('❌ Mongoose error:', err));
 mongoose.connection.on('disconnected', () => console.warn('🟡 Mongoose disconnected'));
@@ -120,11 +94,10 @@ app.use('/api', uploadRoute); // POST /api/upload
 // Health checks
 app.get('/', (_req, res) => res.send('✅ AL Manar School API is running...'));
 app.get('/api/health', (_req, res) => {
-  const hasDbName = /\/[^/?]+(\?|$)/.test(process.env.MONGO_URI || '');
   res.json({
     ok: true,
     mongoUriSet: !!process.env.MONGO_URI,
-    mongoUriHasDbName: hasDbName, // should be true (e.g., /almanar)
+    readyState: mongoose.connection.readyState, // 1 means connected
     nodeEnv: process.env.NODE_ENV || 'development',
   });
 });
