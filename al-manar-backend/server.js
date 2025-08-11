@@ -21,7 +21,7 @@ process.on('unhandledRejection', (reason) => {
 
 // ✅ CORS Setup for frontend + dev
 const allowedOrigins = [
-  'https://al-manar-school-frontend.vercel.app',
+  'https://elmanar.co',
   'http://localhost:3000'
 ];
 
