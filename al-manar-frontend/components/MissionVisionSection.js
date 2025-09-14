@@ -3,24 +3,20 @@ import { useLanguage } from "../components/LanguageContext"; // keep your path
 import { TbTargetArrow } from "react-icons/tb"; // Mission icon
 import { FiEye } from "react-icons/fi";         // Vision icon
 
-// Band card with SIDE-BY-SIDE icon that moves to the proper side per language
+// Band card: icon ALWAYS first in markup.
+// In LTR (EN) it appears on the left; in RTL (AR) it appears on the right automatically via dir=rtl.
 const Band = ({ dir, title, body, Icon }) => {
   const rtl = dir === "rtl";
 
-  // icon should be RIGHT in AR, LEFT in EN
-  const iconBox = `shrink-0 grid place-items-center ${
-    rtl ? "order-2 ml-4" : "order-1 mr-4"
-  }`;
-
-  const textBox = `flex-1 leading-8 ${
-    rtl ? "order-1 text-right" : "order-2 text-left"
-  }`;
+  // Space between icon and text depends on direction.
+  const iconMargin = rtl ? "ml-4" : "mr-4";
+  const textAlign = rtl ? "text-right" : "text-left";
 
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-2xl shadow-md">
-      <div className="px-6 sm:px-10 py-8 md:py-10 flex items-center gap-5 md:gap-8">
-        {/* Icon column */}
-        <div className={iconBox}>
+      <div className={`px-6 sm:px-10 py-8 md:py-10 flex flex-row items-center gap-5 md:gap-8`}>
+        {/* Icon column (first child; placement handled by dir) */}
+        <div className={`shrink-0 grid place-items-center ${iconMargin}`}>
           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-teal-600/10 border-4 border-white shadow grid place-items-center">
             <div className="w-14 h-14 grid place-items-center rounded-full bg-teal-600 text-white">
               <Icon className="w-7 h-7" />
@@ -29,7 +25,7 @@ const Band = ({ dir, title, body, Icon }) => {
         </div>
 
         {/* Text column */}
-        <div className={textBox}>
+        <div className={`flex-1 leading-8 ${textAlign}`}>
           <h3 className="text-teal-600 font-semibold text-2xl mb-2">{title}</h3>
           <p className="text-gray-700">{body}</p>
         </div>
