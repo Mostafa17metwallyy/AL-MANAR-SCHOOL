@@ -3,10 +3,11 @@ import { useLanguage } from "../components/LanguageContext"; // keep your path
 import { TbTargetArrow } from "react-icons/tb"; // Mission icon
 import { FiEye } from "react-icons/fi";         // Vision icon
 
-// Band card with SIDE-BY-SIDE icon that flips with language (RTL-aware)
+// Band card with SIDE-BY-SIDE icon that moves to the proper side per language
 const Band = ({ dir, title, body, Icon }) => {
   const rtl = dir === "rtl";
 
+  // icon should be RIGHT in AR, LEFT in EN
   const iconBox = `shrink-0 grid place-items-center ${
     rtl ? "order-2 ml-4" : "order-1 mr-4"
   }`;
@@ -18,7 +19,7 @@ const Band = ({ dir, title, body, Icon }) => {
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-2xl shadow-md">
       <div className="px-6 sm:px-10 py-8 md:py-10 flex items-center gap-5 md:gap-8">
-        {/* Icon column (follows language side) */}
+        {/* Icon column */}
         <div className={iconBox}>
           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-teal-600/10 border-4 border-white shadow grid place-items-center">
             <div className="w-14 h-14 grid place-items-center rounded-full bg-teal-600 text-white">
@@ -67,13 +68,15 @@ const MissionVisionSection = () => {
 
   return (
     <section id="mission-vision" dir={dir} className="bg-white py-20">
-      {/* Top heading (black) */}
-      <div className="max-w-7xl mx-auto px-6 mb-10">
-        <h2 className={`font-extrabold text-3xl md:text-4xl text-black ${isAR ? "text-right" : "text-left"}`}>
+      {/* Centered heading & subheading */}
+      <div className="max-w-7xl mx-auto px-6 mb-10 text-center">
+        <h2 className="font-extrabold text-3xl md:text-4xl text-black">
           {t.heading}
         </h2>
-        <p className={`text-gray-600 mt-2 ${isAR ? "text-right" : "text-left"}`}>{t.sub}</p>
-        <div className="h-1 w-24 bg-teal-500 rounded-full mt-4" />
+        <p className="text-teal-600 mt-2">
+          {t.sub}
+        </p>
+        <div className="h-1 w-24 bg-teal-500 rounded-full mt-4 mx-auto" />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 space-y-8">
