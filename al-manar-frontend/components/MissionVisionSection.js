@@ -1,37 +1,31 @@
 import React from "react";
-import { useLanguage } from "../components/LanguageContext"; // adjust path if needed
+import { useLanguage } from "../components/LanguageContext"; // keep your path
 import { TbTargetArrow } from "react-icons/tb"; // Mission icon
 import { FiEye } from "react-icons/fi";         // Vision icon
 
-/**
- * Wide "band" card with an overlapping circular icon.
- */
+// Band card with SIDE-BY-SIDE icon (RTL-aware)
 const Band = ({ dir, title, body, Icon }) => {
   const rtl = dir === "rtl";
   return (
-    <div className="relative">
-      {/* Card / band */}
-      <div className="bg-gray-50 border border-gray-200 rounded-2xl shadow-md">
-        <div className={`px-6 sm:px-10 py-10 ${rtl ? "text-right" : "text-left"}`}>
-          {/* teal subtitle */}
-          <h3 className="text-teal-600 font-semibold text-2xl mb-3">{title}</h3>
-          {/* body text, non-bulleted */}
-          <p className="text-gray-700 leading-8 max-w-5xl">
-            {body}
-          </p>
-        </div>
-      </div>
-
-      {/* Overlapping circular icon */}
+    <div className="bg-gray-50 border border-gray-200 rounded-2xl shadow-md">
       <div
-        className={`absolute top-1/2 -translate-y-1/2 ${
-          rtl ? "right-6 sm:right-10" : "left-6 sm:left-10"
+        className={`px-6 sm:px-10 py-8 md:py-10 flex gap-5 md:gap-8 ${
+          rtl ? "flex-row-reverse text-right" : "flex-row text-left"
         }`}
       >
-        <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-teal-600/10 border-4 border-white shadow grid place-items-center">
-          <div className="w-16 h-16 grid place-items-center rounded-full bg-teal-600 text-white">
-            <Icon className="w-8 h-8" />
+        {/* Icon column */}
+        <div className="shrink-0 grid place-items-center">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-teal-600/10 border-4 border-white shadow grid place-items-center">
+            <div className="w-14 h-14 grid place-items-center rounded-full bg-teal-600 text-white">
+              <Icon className="w-7 h-7" />
+            </div>
           </div>
+        </div>
+
+        {/* Text column */}
+        <div className="flex-1 leading-8">
+          <h3 className="text-teal-600 font-semibold text-2xl mb-2">{title}</h3>
+          <p className="text-gray-700">{body}</p>
         </div>
       </div>
     </div>
@@ -43,7 +37,6 @@ const MissionVisionSection = () => {
   const isAR = language === "ar";
   const dir = isAR ? "rtl" : "ltr";
 
-  // ——— Text (no bullet points) ———
   const t = {
     ar: {
       heading: "رسالتنا ورؤيتنا",
