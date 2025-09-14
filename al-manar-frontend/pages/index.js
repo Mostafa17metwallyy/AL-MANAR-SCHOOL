@@ -7,12 +7,14 @@ import AdmissionSection from '@/components/AdmissionSection';
 import AdminPanel from '@/components/AdminPanel';
 import AnnouncementSection from '@/components/AnnouncementSection';
 import LocationSection from '@/components/LocationSection';
+import MissionVisionSection from '@/components/MissionVisionSection';
 
 export default function Home() {
   return (
     <div>
       <Navbar />
       <HeroSection />
+      <MissionVisionSection/>
       <DivisionsSection />
       <PrincipalSection />
       <AboutSection/>
