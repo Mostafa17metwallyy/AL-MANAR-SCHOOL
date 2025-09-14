@@ -1,6 +1,5 @@
 import React from "react";
-// ⬇️ Change this path if your context lives somewhere else
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "../components/LanguageContext";
 
 const MissionVisionSection = () => {
   const { language } = useLanguage();
