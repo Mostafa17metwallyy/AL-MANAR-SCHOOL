@@ -29,10 +29,10 @@ const PrincipalSection = () => {
           />
           <div>
             <h3 className="text-lg font-semibold">
-              {language === "en" ? "Mrs/Shaimaa Ali" : "الدكتور مروان سعد"}
+              {language === "en" ? "Mrs/Shaimaa Ali" : "السيدة/ شيماء علي"}
             </h3>
             <p className="text-sm text-gray-200">
-              {language === "en" ? "Director of School" : "مدير المدرسة"}
+              {language === "en" ? "Director of School" : "مديرة المدرسة"}
             </p>
           </div>
         </div>
