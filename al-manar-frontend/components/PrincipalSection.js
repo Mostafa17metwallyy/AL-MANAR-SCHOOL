@@ -24,12 +24,12 @@ const PrincipalSection = () => {
         <div className="flex items-center gap-4 mb-8">
           <img
             src="/assets/principle.jpeg"
-            alt="Dr. Marwan Saad"
+            alt="Mrs/Shaimaa Ali"
             className="w-20 h-20 rounded-full object-cover"
           />
           <div>
             <h3 className="text-lg font-semibold">
-              {language === "en" ? "Dr. Marwan Saad" : "الدكتور مروان سعد"}
+              {language === "en" ? "Mrs/Shaimaa Ali" : "الدكتور مروان سعد"}
             </h3>
             <p className="text-sm text-gray-200">
               {language === "en" ? "Director of School" : "مدير المدرسة"}
