@@ -1,5 +1,5 @@
 import React from "react";
-import { useLanguage } from "@/contexts/LanguageContext"; // ← update if needed
+import { useLanguage } from "../components/LanguageContext"; // ← update if needed
 import { TbTargetArrow } from "react-icons/tb"; // throwing dart / target
 import { FiEye } from "react-icons/fi";         // eye icon
 
