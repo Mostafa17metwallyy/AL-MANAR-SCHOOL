@@ -3,18 +3,23 @@ import { useLanguage } from "../components/LanguageContext"; // keep your path
 import { TbTargetArrow } from "react-icons/tb"; // Mission icon
 import { FiEye } from "react-icons/fi";         // Vision icon
 
-// Band card with SIDE-BY-SIDE icon (RTL-aware)
+// Band card with SIDE-BY-SIDE icon that flips with language (RTL-aware)
 const Band = ({ dir, title, body, Icon }) => {
   const rtl = dir === "rtl";
+
+  const iconBox = `shrink-0 grid place-items-center ${
+    rtl ? "order-2 ml-4" : "order-1 mr-4"
+  }`;
+
+  const textBox = `flex-1 leading-8 ${
+    rtl ? "order-1 text-right" : "order-2 text-left"
+  }`;
+
   return (
     <div className="bg-gray-50 border border-gray-200 rounded-2xl shadow-md">
-      <div
-        className={`px-6 sm:px-10 py-8 md:py-10 flex gap-5 md:gap-8 ${
-          rtl ? "flex-row-reverse text-right" : "flex-row text-left"
-        }`}
-      >
-        {/* Icon column */}
-        <div className="shrink-0 grid place-items-center">
+      <div className="px-6 sm:px-10 py-8 md:py-10 flex items-center gap-5 md:gap-8">
+        {/* Icon column (follows language side) */}
+        <div className={iconBox}>
           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-teal-600/10 border-4 border-white shadow grid place-items-center">
             <div className="w-14 h-14 grid place-items-center rounded-full bg-teal-600 text-white">
               <Icon className="w-7 h-7" />
@@ -23,7 +28,7 @@ const Band = ({ dir, title, body, Icon }) => {
         </div>
 
         {/* Text column */}
-        <div className="flex-1 leading-8">
+        <div className={textBox}>
           <h3 className="text-teal-600 font-semibold text-2xl mb-2">{title}</h3>
           <p className="text-gray-700">{body}</p>
         </div>
