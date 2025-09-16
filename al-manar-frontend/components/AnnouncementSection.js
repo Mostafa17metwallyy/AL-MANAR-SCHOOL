@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLanguage } from "./LanguageContext";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 /* Reuse same small spinner */
 const Spinner = ({ label = "Loading..." }) => (
@@ -100,7 +102,35 @@ const AnnouncementSection = () => {
               >
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-teal-800 mb-2">{ann.title}</h3>
-                  <p className="text-gray-700 mb-3">{ann.description}</p>
+
+                  {/* Markdown-rendered description */}
+                  <div className={`${language === "ar" ? "text-right" : "text-left"} text-gray-800 leading-7 mb-3`}>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        a: ({node, ...props}) => (
+                          <a {...props} target="_blank" rel="noopener noreferrer" className="underline" />
+                        ),
+                        ul: ({node, ...props}) => <ul {...props} className="list-disc ml-5 space-y-1" />,
+                        ol: ({node, ...props}) => <ol {...props} className="list-decimal ml-5 space-y-1" />,
+                        p:  ({node, ...props}) => <p {...props} className="my-2" />,
+                        h1: ({node, ...props}) => <h1 {...props} className="text-2xl font-bold my-3" />,
+                        h2: ({node, ...props}) => <h2 {...props} className="text-xl font-bold my-3" />,
+                        h3: ({node, ...props}) => <h3 {...props} className="text-lg font-semibold my-2" />,
+                        strong: ({node, ...props}) => <strong {...props} className="font-semibold" />,
+                        em: ({node, ...props}) => <em {...props} className="italic" />,
+                        blockquote: ({node, ...props}) => (
+                          <blockquote {...props} className="border-s-4 ps-3 italic text-gray-600 my-3" />
+                        ),
+                        code: ({inline, ...props}) =>
+                          inline
+                            ? <code {...props} className="px-1 py-0.5 rounded bg-gray-100" />
+                            : <pre className="p-3 rounded bg-gray-100 overflow-x-auto"><code {...props} /></pre>,
+                      }}
+                    >
+                      {ann.description || ""}
+                    </ReactMarkdown>
+                  </div>
 
                   {ann.mediaType === "image" && ann.mediaUrl && (
                     <img

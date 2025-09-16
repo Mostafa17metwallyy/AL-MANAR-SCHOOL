@@ -2,13 +2,27 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useLanguage } from "./LanguageContext"; // Adjust path if needed
 import toast, { Toaster } from "react-hot-toast";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 /* Reusable spinner */
 const Spinner = ({ label = "Loading..." }) => (
   <div className="flex items-center gap-2 text-gray-500">
     <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+        fill="none"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
     </svg>
     <span>{label}</span>
   </div>
@@ -113,7 +127,8 @@ const AdminPanel = () => {
 
   const handleSlotSubmit = async (e) => {
     e.preventDefault();
-    if (!startTime || !endTime) return toast.error("Start and end time required");
+    if (!startTime || !endTime)
+      return toast.error("Start and end time required");
     setLoading(true);
 
     try {
@@ -149,7 +164,9 @@ const AdminPanel = () => {
 
   const handleDeleteAdmission = async (id) => {
     try {
-      const res = await fetch(`${BASE}/api/admission/${id}`, { method: "DELETE" });
+      const res = await fetch(`${BASE}/api/admission/${id}`, {
+        method: "DELETE",
+      });
       if (!res.ok) return toast.error("Delete failed");
       setAdmissions((prev) => prev.filter((a) => a._id !== id));
       toast.success("Admission deleted");
@@ -168,12 +185,21 @@ const AdminPanel = () => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${BASE}/api/announcements`, { method: "POST", body: formData });
+      const res = await fetch(`${BASE}/api/announcements`, {
+        method: "POST",
+        body: formData,
+      });
       const newAnn = await res.json();
-      if (!res.ok || !newAnn._id) return toast.error("Failed to post announcement.");
+      if (!res.ok || !newAnn._id)
+        return toast.error("Failed to post announcement.");
 
       setAnnouncements((prev) => [...prev, { ...newAnn, editing: false }]);
-      setAnnouncement({ title: "", description: "", mediaType: "text", file: null });
+      setAnnouncement({
+        title: "",
+        description: "",
+        mediaType: "text",
+        file: null,
+      });
       toast.success("Announcement posted");
     } catch {
       toast.error("Server error");
@@ -184,10 +210,14 @@ const AdminPanel = () => {
 
   const handleDeleteAnnouncement = async (id) => {
     try {
-      const res = await fetch(`${BASE}/api/announcements/${id}`, { method: "DELETE" });
+      const res = await fetch(`${BASE}/api/announcements/${id}`, {
+        method: "DELETE",
+      });
       if (!res.ok) return toast.error("Delete failed");
 
-      const updated = await fetch(`${BASE}/api/announcements`).then((r) => r.json());
+      const updated = await fetch(`${BASE}/api/announcements`).then((r) =>
+        r.json()
+      );
       if (Array.isArray(updated)) {
         setAnnouncements(updated.map((a) => ({ ...a, editing: false })));
         toast.success("Announcement deleted");
@@ -224,7 +254,10 @@ const AdminPanel = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6" dir={language === "ar" ? "rtl" : "ltr"}>
+    <div
+      className="min-h-screen bg-gray-100 p-6"
+      dir={language === "ar" ? "rtl" : "ltr"}
+    >
       <Toaster position="top-right" />
       <button
         onClick={handleLogout}
@@ -246,7 +279,13 @@ const AdminPanel = () => {
 
           {admissionsLoading ? (
             <div className="bg-white rounded shadow p-4">
-              <Spinner label={language === "en" ? "Loading admissions..." : "جارِ تحميل الطلبات..."} />
+              <Spinner
+                label={
+                  language === "en"
+                    ? "Loading admissions..."
+                    : "جارِ تحميل الطلبات..."
+                }
+              />
               <div className="mt-4 space-y-3">
                 {[...Array(3)].map((_, i) => (
                   <div key={i} className="grid grid-cols-6 gap-3">
@@ -264,18 +303,30 @@ const AdminPanel = () => {
               <table className="min-w-full bg-white rounded shadow text-black">
                 <thead className="bg-teal-600 text-white">
                   <tr>
-                    <th className="px-4 py-2">{language === "en" ? "Name" : "الاسم"}</th>
+                    <th className="px-4 py-2">
+                      {language === "en" ? "Name" : "الاسم"}
+                    </th>
                     <th className="px-4 py-2">Email</th>
-                    <th className="px-4 py-2">{language === "en" ? "Division" : "القسم"}</th>
-                    <th className="px-4 py-2">{language === "en" ? "Year" : "الصف"}</th>
-                    <th className="px-4 py-2">{language === "en" ? "Slot" : "الميعاد"}</th>
-                    <th className="px-4 py-2">{language === "en" ? "Actions" : "إجراءات"}</th>
+                    <th className="px-4 py-2">
+                      {language === "en" ? "Division" : "القسم"}
+                    </th>
+                    <th className="px-4 py-2">
+                      {language === "en" ? "Year" : "الصف"}
+                    </th>
+                    <th className="px-4 py-2">
+                      {language === "en" ? "Slot" : "الميعاد"}
+                    </th>
+                    <th className="px-4 py-2">
+                      {language === "en" ? "Actions" : "إجراءات"}
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {admissions.map((a, i) => (
                     <tr key={i} className="even:bg-gray-50">
-                      <td className="px-4 py-2">{a.firstName} {a.lastName}</td>
+                      <td className="px-4 py-2">
+                        {a.firstName} {a.lastName}
+                      </td>
                       <td className="px-4 py-2">{a.email}</td>
                       <td className="px-4 py-2">{a.division}</td>
                       <td className="px-4 py-2">{a.year}</td>
@@ -292,8 +343,13 @@ const AdminPanel = () => {
                   ))}
                   {admissions.length === 0 && (
                     <tr>
-                      <td colSpan="6" className="px-4 py-6 text-center text-gray-500">
-                        {language === "en" ? "No admissions yet." : "لا توجد طلبات حتى الآن."}
+                      <td
+                        colSpan="6"
+                        className="px-4 py-6 text-center text-gray-500"
+                      >
+                        {language === "en"
+                          ? "No admissions yet."
+                          : "لا توجد طلبات حتى الآن."}
                       </td>
                     </tr>
                   )}
@@ -308,7 +364,10 @@ const AdminPanel = () => {
           <h2 className="text-xl font-semibold mb-2 text-black">
             {language === "en" ? "Add Time Slot" : "إضافة موعد"}
           </h2>
-          <form onSubmit={handleSlotSubmit} className="flex flex-col sm:flex-row gap-3">
+          <form
+            onSubmit={handleSlotSubmit}
+            className="flex flex-col sm:flex-row gap-3"
+          >
             <input
               type="time"
               value={startTime}
@@ -330,14 +389,26 @@ const AdminPanel = () => {
                 loading ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
-              {loading ? (language === "en" ? "Saving..." : "جارِ الحفظ...") : language === "en" ? "Add" : "إضافة"}
+              {loading
+                ? language === "en"
+                  ? "Saving..."
+                  : "جارِ الحفظ..."
+                : language === "en"
+                ? "Add"
+                : "إضافة"}
             </button>
           </form>
 
           <div className="mt-4 space-y-2">
             {slotsLoading ? (
               <>
-                <Spinner label={language === "en" ? "Loading time slots..." : "جارِ تحميل المواعيد..."} />
+                <Spinner
+                  label={
+                    language === "en"
+                      ? "Loading time slots..."
+                      : "جارِ تحميل المواعيد..."
+                  }
+                />
                 {[...Array(3)].map((_, i) => (
                   <Skeleton key={i} className="h-12 w-full" />
                 ))}
@@ -377,24 +448,112 @@ const AdminPanel = () => {
               type="text"
               placeholder={language === "en" ? "Title" : "العنوان"}
               value={announcement.title}
-              onChange={(e) => setAnnouncement({ ...announcement, title: e.target.value })}
+              onChange={(e) =>
+                setAnnouncement({ ...announcement, title: e.target.value })
+              }
               className="w-full border px-3 py-2 rounded text-black"
               required
             />
             <textarea
-              placeholder={language === "en" ? "Description" : "الوصف"}
+              placeholder={
+                language === "en"
+                  ? "Description (Markdown supported)"
+                  : "الوصف (يدعم Markdown)"
+              }
               value={announcement.description}
-              onChange={(e) => setAnnouncement({ ...announcement, description: e.target.value })}
-              className="w-full border px-3 py-2 rounded text-black"
+              onChange={(e) =>
+                setAnnouncement({
+                  ...announcement,
+                  description: e.target.value,
+                })
+              }
+              className="w-full border px-3 py-2 rounded text-black min-h-[140px]"
               required
             />
+            <p className="text-xs text-gray-500">
+              {language === "en"
+                ? "Tips: Use **bold**, _italic_, - lists, ## headings, and [links](https://example.com)."
+                : "نصائح: استخدم **غامق**، _مائل_، - قوائم، ## عناوين، و [روابط](https://example.com)."}
+            </p>
+            <div className="mt-3 border rounded bg-white p-3">
+              <h4 className="font-semibold text-sm text-gray-600 mb-2">
+                {language === "en" ? "Preview" : "معاينة"}
+              </h4>
+              <div
+                className={`${
+                  language === "ar" ? "text-right" : "text-left"
+                } text-gray-800 leading-7`}
+              >
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    a: ({ node, ...props }) => (
+                      <a
+                        {...props}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      />
+                    ),
+                    ul: ({ node, ...props }) => (
+                      <ul {...props} className="list-disc ml-5 space-y-1" />
+                    ),
+                    ol: ({ node, ...props }) => (
+                      <ol {...props} className="list-decimal ml-5 space-y-1" />
+                    ),
+                    p: ({ node, ...props }) => (
+                      <p {...props} className="my-2" />
+                    ),
+                    h1: ({ node, ...props }) => (
+                      <h1 {...props} className="text-2xl font-bold my-3" />
+                    ),
+                    h2: ({ node, ...props }) => (
+                      <h2 {...props} className="text-xl font-bold my-3" />
+                    ),
+                    h3: ({ node, ...props }) => (
+                      <h3 {...props} className="text-lg font-semibold my-2" />
+                    ),
+                    strong: ({ node, ...props }) => (
+                      <strong {...props} className="font-semibold" />
+                    ),
+                    em: ({ node, ...props }) => (
+                      <em {...props} className="italic" />
+                    ),
+                    blockquote: ({ node, ...props }) => (
+                      <blockquote
+                        {...props}
+                        className="border-s-4 ps-3 italic text-gray-600 my-3"
+                      />
+                    ),
+                    code: ({ inline, ...props }) =>
+                      inline ? (
+                        <code
+                          {...props}
+                          className="px-1 py-0.5 rounded bg-gray-100"
+                        />
+                      ) : (
+                        <pre className="p-3 rounded bg-gray-100 overflow-x-auto">
+                          <code {...props} />
+                        </pre>
+                      ),
+                  }}
+                >
+                  {announcement.description ||
+                    (language === "en"
+                      ? "_Start typing…_"
+                      : "_ابدأ بالكتابة…_")}
+                </ReactMarkdown>
+              </div>
+            </div>{" "}
             <input
               type="file"
               accept="image/*,video/*"
               onChange={(e) => {
                 const file = e.target.files[0];
                 if (file) {
-                  const type = file.type.startsWith("image") ? "image" : "video";
+                  const type = file.type.startsWith("image")
+                    ? "image"
+                    : "video";
                   setAnnouncement({ ...announcement, file, mediaType: type });
                 }
               }}
@@ -407,7 +566,13 @@ const AdminPanel = () => {
                 loading ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
-              {loading ? (language === "en" ? "Posting..." : "جارِ النشر...") : language === "en" ? "Post" : "نشر"}
+              {loading
+                ? language === "en"
+                  ? "Posting..."
+                  : "جارِ النشر..."
+                : language === "en"
+                ? "Post"
+                : "نشر"}
             </button>
           </form>
         </section>
@@ -419,10 +584,19 @@ const AdminPanel = () => {
 
           {annLoading ? (
             <div className="space-y-4">
-              <Spinner label={language === "en" ? "Loading announcements..." : "جارِ تحميل الإعلانات..."} />
+              <Spinner
+                label={
+                  language === "en"
+                    ? "Loading announcements..."
+                    : "جارِ تحميل الإعلانات..."
+                }
+              />
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-white p-4 rounded shadow space-y-3">
+                  <div
+                    key={i}
+                    className="bg-white p-4 rounded shadow space-y-3"
+                  >
                     <Skeleton className="h-5 w-2/3" />
                     <Skeleton className="h-4 w-full" />
                     <Skeleton className="h-40 w-full" />
@@ -466,7 +640,11 @@ const AdminPanel = () => {
                           const file = e.target.files[0];
                           const updated = [...announcements];
                           updated[index].file = file;
-                          updated[index].mediaType = file?.type.startsWith("image") ? "image" : "video";
+                          updated[index].mediaType = file?.type.startsWith(
+                            "image"
+                          )
+                            ? "image"
+                            : "video";
                           setAnnouncements(updated);
                         }}
                       />
@@ -492,10 +670,18 @@ const AdminPanel = () => {
                     </>
                   ) : (
                     <>
-                      <h3 className="text-lg font-bold text-black">{ann.title}</h3>
-                      <p className="text-sm mb-2 text-black">{ann.description}</p>
+                      <h3 className="text-lg font-bold text-black">
+                        {ann.title}
+                      </h3>
+                      <p className="text-sm mb-2 text-black">
+                        {ann.description}
+                      </p>
                       {ann.mediaType === "image" && ann.mediaUrl && (
-                        <img src={ann.mediaUrl} className="w-full rounded mb-2" alt="announcement media" />
+                        <img
+                          src={ann.mediaUrl}
+                          className="w-full rounded mb-2"
+                          alt="announcement media"
+                        />
                       )}
                       {ann.mediaType === "video" && ann.mediaUrl && (
                         <video controls className="w-full rounded mb-2">
@@ -525,7 +711,11 @@ const AdminPanel = () => {
                 </div>
               ))}
               {announcements.length === 0 && (
-                <p className="text-gray-500">{language === "en" ? "No announcements yet." : "لا توجد إعلانات بعد."}</p>
+                <p className="text-gray-500">
+                  {language === "en"
+                    ? "No announcements yet."
+                    : "لا توجد إعلانات بعد."}
+                </p>
               )}
             </div>
           )}
