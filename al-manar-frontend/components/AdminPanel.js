@@ -2,8 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useLanguage } from "./LanguageContext"; // Adjust path if needed
 import toast, { Toaster } from "react-hot-toast";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import DOMPurify from "dompurify";
+
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import Link from "@tiptap/extension-link";
+import TextAlign from "@tiptap/extension-text-align";
+import TextStyle from "@tiptap/extension-text-style";
+import Color from "@tiptap/extension-color";
+import Highlight from "@tiptap/extension-highlight";
+
+const isArabic = (s = "") => /[\u0600-\u06FF]/.test(s);
 
 /* Reusable spinner */
 const Spinner = ({ label = "Loading..." }) => (
@@ -252,6 +262,35 @@ const AdminPanel = () => {
       setLoading(false);
     }
   };
+  const [editorDir, setEditorDir] = useState("ltr"); // "rtl" | "ltr"
+
+  // Auto set direction when language changes
+  useEffect(() => {
+    if (isArabic(announcement.description) || language === "ar") {
+      setEditorDir("rtl");
+    } else {
+      setEditorDir("ltr");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+      Highlight,
+      TextStyle,
+      Color,
+      Link.configure({ openOnClick: true, autolink: true }),
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
+    ],
+    content: announcement.description || "", // load any existing HTML
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      setAnnouncement((prev) => ({ ...prev, description: html }));
+      if (isArabic(html)) setEditorDir("rtl"); // live switch when user types Arabic
+    },
+  });
 
   return (
     <div
@@ -454,97 +493,162 @@ const AdminPanel = () => {
               className="w-full border px-3 py-2 rounded text-black"
               required
             />
-            <textarea
-              placeholder={
-                language === "en"
-                  ? "Description (Markdown supported)"
-                  : "الوصف (يدعم Markdown)"
-              }
-              value={announcement.description}
-              onChange={(e) =>
-                setAnnouncement({
-                  ...announcement,
-                  description: e.target.value,
-                })
-              }
-              className="w-full border px-3 py-2 rounded text-black min-h-[140px]"
-              required
-            />
-            <p className="text-xs text-gray-500">
-              {language === "en"
-                ? "Tips: Use **bold**, _italic_, - lists, ## headings, and [links](https://example.com)."
-                : "نصائح: استخدم **غامق**، _مائل_، - قوائم، ## عناوين، و [روابط](https://example.com)."}
-            </p>
+            {/* Toolbar */}
+            <div className="flex flex-wrap gap-2 mb-2">
+              <button
+                onClick={() => editor?.chain().focus().toggleBold().run()}
+                className="px-2 py-1 border rounded"
+              >
+                B
+              </button>
+              <button
+                onClick={() => editor?.chain().focus().toggleItalic().run()}
+                className="px-2 py-1 border rounded italic"
+              >
+                I
+              </button>
+              <button
+                onClick={() => editor?.chain().focus().toggleUnderline().run()}
+                className="px-2 py-1 border rounded underline"
+              >
+                U
+              </button>
+              <button
+                onClick={() => editor?.chain().focus().toggleStrike().run()}
+                className="px-2 py-1 border rounded"
+              >
+                S
+              </button>
+
+              <button
+                onClick={() =>
+                  editor?.chain().focus().toggleHeading({ level: 1 }).run()
+                }
+                className="px-2 py-1 border rounded"
+              >
+                H1
+              </button>
+              <button
+                onClick={() =>
+                  editor?.chain().focus().toggleHeading({ level: 2 }).run()
+                }
+                className="px-2 py-1 border rounded"
+              >
+                H2
+              </button>
+              <button
+                onClick={() =>
+                  editor?.chain().focus().toggleHeading({ level: 3 }).run()
+                }
+                className="px-2 py-1 border rounded"
+              >
+                H3
+              </button>
+
+              <button
+                onClick={() => editor?.chain().focus().toggleBulletList().run()}
+                className="px-2 py-1 border rounded"
+              >
+                • List
+              </button>
+              <button
+                onClick={() =>
+                  editor?.chain().focus().toggleOrderedList().run()
+                }
+                className="px-2 py-1 border rounded"
+              >
+                1. List
+              </button>
+
+              <button
+                onClick={() =>
+                  editor?.chain().focus().setTextAlign("left").run()
+                }
+                className="px-2 py-1 border rounded"
+              >
+                Left
+              </button>
+              <button
+                onClick={() =>
+                  editor?.chain().focus().setTextAlign("center").run()
+                }
+                className="px-2 py-1 border rounded"
+              >
+                Center
+              </button>
+              <button
+                onClick={() =>
+                  editor?.chain().focus().setTextAlign("right").run()
+                }
+                className="px-2 py-1 border rounded"
+              >
+                Right
+              </button>
+
+              {/* Direction for whole editor */}
+              <button
+                onClick={() => setEditorDir("ltr")}
+                className="px-2 py-1 border rounded"
+              >
+                LTR
+              </button>
+              <button
+                onClick={() => setEditorDir("rtl")}
+                className="px-2 py-1 border rounded"
+              >
+                RTL
+              </button>
+
+              <button
+                onClick={() => {
+                  const url = prompt("Enter URL");
+                  if (url) editor?.chain().focus().setLink({ href: url }).run();
+                }}
+                className="px-2 py-1 border rounded"
+              >
+                Link
+              </button>
+
+              <button
+                onClick={() =>
+                  editor?.chain().focus().unsetAllMarks().clearNodes().run()
+                }
+                className="px-2 py-1 border rounded"
+              >
+                Clear
+              </button>
+            </div>
+
+            {/* Editor (direction applied to wrapper) */}
+            <div className="border rounded bg-white" dir={editorDir}>
+              <EditorContent
+                editor={editor}
+                className="min-h-[160px] px-3 py-2"
+              />
+            </div>
+
+            {/* Live preview (sanitized HTML) */}
             <div className="mt-3 border rounded bg-white p-3">
               <h4 className="font-semibold text-sm text-gray-600 mb-2">
                 {language === "en" ? "Preview" : "معاينة"}
               </h4>
               <div
-                className={`${
-                  language === "ar" ? "text-right" : "text-left"
-                } text-gray-800 leading-7`}
-              >
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    a: ({ node, ...props }) => (
-                      <a
-                        {...props}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline"
-                      />
-                    ),
-                    ul: ({ node, ...props }) => (
-                      <ul {...props} className="list-disc ml-5 space-y-1" />
-                    ),
-                    ol: ({ node, ...props }) => (
-                      <ol {...props} className="list-decimal ml-5 space-y-1" />
-                    ),
-                    p: ({ node, ...props }) => (
-                      <p {...props} className="my-2" />
-                    ),
-                    h1: ({ node, ...props }) => (
-                      <h1 {...props} className="text-2xl font-bold my-3" />
-                    ),
-                    h2: ({ node, ...props }) => (
-                      <h2 {...props} className="text-xl font-bold my-3" />
-                    ),
-                    h3: ({ node, ...props }) => (
-                      <h3 {...props} className="text-lg font-semibold my-2" />
-                    ),
-                    strong: ({ node, ...props }) => (
-                      <strong {...props} className="font-semibold" />
-                    ),
-                    em: ({ node, ...props }) => (
-                      <em {...props} className="italic" />
-                    ),
-                    blockquote: ({ node, ...props }) => (
-                      <blockquote
-                        {...props}
-                        className="border-s-4 ps-3 italic text-gray-600 my-3"
-                      />
-                    ),
-                    code: ({ inline, ...props }) =>
-                      inline ? (
-                        <code
-                          {...props}
-                          className="px-1 py-0.5 rounded bg-gray-100"
-                        />
-                      ) : (
-                        <pre className="p-3 rounded bg-gray-100 overflow-x-auto">
-                          <code {...props} />
-                        </pre>
-                      ),
-                  }}
-                >
-                  {announcement.description ||
-                    (language === "en"
-                      ? "_Start typing…_"
-                      : "_ابدأ بالكتابة…_")}
-                </ReactMarkdown>
-              </div>
-            </div>{" "}
+                dir={
+                  isArabic(announcement.description)
+                    ? "rtl"
+                    : language === "ar"
+                    ? "rtl"
+                    : "ltr"
+                }
+                className="prose max-w-none text-gray-800 leading-7"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(
+                    announcement.description || "<em>Start typing…</em>"
+                  ),
+                }}
+              />
+            </div>
+
             <input
               type="file"
               accept="image/*,video/*"

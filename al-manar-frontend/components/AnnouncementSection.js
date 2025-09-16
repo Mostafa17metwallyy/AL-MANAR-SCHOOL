@@ -1,14 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { useLanguage } from "./LanguageContext";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import DOMPurify from "dompurify";
+
+const isArabic = (s = "") => /[\u0600-\u06FF]/.test(s);
 
 /* Reuse same small spinner */
 const Spinner = ({ label = "Loading..." }) => (
   <div className="flex items-center justify-center gap-2 text-gray-500">
     <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+        fill="none"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      />
     </svg>
     <span>{label}</span>
   </div>
@@ -34,7 +47,9 @@ const AnnouncementSection = () => {
     (async () => {
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/announcements`);
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE}/api/announcements`
+        );
         const data = await res.json();
         if (Array.isArray(data)) {
           setAnnouncements(data);
@@ -45,7 +60,11 @@ const AnnouncementSection = () => {
         }
       } catch (e) {
         setAnnouncements([]);
-        setErr(language === "en" ? "Failed to fetch announcements." : "فشل في جلب الإعلانات.");
+        setErr(
+          language === "en"
+            ? "Failed to fetch announcements."
+            : "فشل في جلب الإعلانات."
+        );
       } finally {
         setLoading(false);
       }
@@ -71,7 +90,11 @@ const AnnouncementSection = () => {
           <>
             <div className="mb-6">
               <Spinner
-                label={language === "en" ? "Loading announcements..." : "جارِ تحميل الإعلانات..."}
+                label={
+                  language === "en"
+                    ? "Loading announcements..."
+                    : "جارِ تحميل الإعلانات..."
+                }
               />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -87,10 +110,14 @@ const AnnouncementSection = () => {
         ) : announcements.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center text-gray-500 text-lg mt-20">
             <p className="text-xl font-semibold text-gray-600">
-              {language === "en" ? "No announcements yet" : "لا توجد إعلانات حالياً"}
+              {language === "en"
+                ? "No announcements yet"
+                : "لا توجد إعلانات حالياً"}
             </p>
             <p className="text-sm text-gray-400 mt-1">
-              {language === "en" ? "Please check back later for updates." : "يرجى العودة لاحقاً لمزيد من التحديثات."}
+              {language === "en"
+                ? "Please check back later for updates."
+                : "يرجى العودة لاحقاً لمزيد من التحديثات."}
             </p>
           </div>
         ) : (
@@ -101,35 +128,34 @@ const AnnouncementSection = () => {
                 className="bg-white shadow-lg rounded-lg overflow-hidden transition-transform transform hover:scale-105"
               >
                 <div className="p-6">
-                  <h3 className="text-xl font-semibold text-teal-800 mb-2">{ann.title}</h3>
+                  <h3 className="text-xl font-semibold text-teal-800 mb-2">
+                    {ann.title}
+                  </h3>
 
                   {/* Markdown-rendered description */}
-                  <div className={`${language === "ar" ? "text-right" : "text-left"} text-gray-800 leading-7 mb-3`}>
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        a: ({node, ...props}) => (
-                          <a {...props} target="_blank" rel="noopener noreferrer" className="underline" />
+                  <div
+                    className={`${
+                      language === "ar" ? "text-right" : "text-left"
+                    } text-gray-800 leading-7 mb-3`}
+                  >
+                    <div
+                      dir={
+                        isArabic(ann.description)
+                          ? "rtl"
+                          : language === "ar"
+                          ? "rtl"
+                          : "ltr"
+                      }
+                      className="prose max-w-none text-gray-800 leading-7 mb-3"
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(
+                          // If older announcements are plain text (no tags), keep line breaks:
+                          /<\/?[a-z][\s\S]*>/i.test(ann.description || "")
+                            ? ann.description
+                            : (ann.description || "").replace(/\n/g, "<br/>")
                         ),
-                        ul: ({node, ...props}) => <ul {...props} className="list-disc ml-5 space-y-1" />,
-                        ol: ({node, ...props}) => <ol {...props} className="list-decimal ml-5 space-y-1" />,
-                        p:  ({node, ...props}) => <p {...props} className="my-2" />,
-                        h1: ({node, ...props}) => <h1 {...props} className="text-2xl font-bold my-3" />,
-                        h2: ({node, ...props}) => <h2 {...props} className="text-xl font-bold my-3" />,
-                        h3: ({node, ...props}) => <h3 {...props} className="text-lg font-semibold my-2" />,
-                        strong: ({node, ...props}) => <strong {...props} className="font-semibold" />,
-                        em: ({node, ...props}) => <em {...props} className="italic" />,
-                        blockquote: ({node, ...props}) => (
-                          <blockquote {...props} className="border-s-4 ps-3 italic text-gray-600 my-3" />
-                        ),
-                        code: ({inline, ...props}) =>
-                          inline
-                            ? <code {...props} className="px-1 py-0.5 rounded bg-gray-100" />
-                            : <pre className="p-3 rounded bg-gray-100 overflow-x-auto"><code {...props} /></pre>,
                       }}
-                    >
-                      {ann.description || ""}
-                    </ReactMarkdown>
+                    />
                   </div>
 
                   {ann.mediaType === "image" && ann.mediaUrl && (
