@@ -493,34 +493,37 @@ const AdminPanel = () => {
               className="w-full border px-3 py-2 rounded text-black"
               required
             />
-            {/* Toolbar */}
+
             {/* Toolbar */}
             <div className="flex flex-wrap gap-2 mb-2">
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleBold().run()}
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 B
               </button>
+
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleItalic().run()}
-                className="px-2 py-1 border rounded italic"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition italic"
               >
                 I
               </button>
+
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                className="px-2 py-1 border rounded underline"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition underline"
               >
                 U
               </button>
+
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleStrike().run()}
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 S
               </button>
@@ -530,7 +533,7 @@ const AdminPanel = () => {
                 onClick={() =>
                   editor?.chain().focus().toggleHeading({ level: 1 }).run()
                 }
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 H1
               </button>
@@ -539,7 +542,7 @@ const AdminPanel = () => {
                 onClick={() =>
                   editor?.chain().focus().toggleHeading({ level: 2 }).run()
                 }
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 H2
               </button>
@@ -548,7 +551,7 @@ const AdminPanel = () => {
                 onClick={() =>
                   editor?.chain().focus().toggleHeading({ level: 3 }).run()
                 }
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 H3
               </button>
@@ -556,7 +559,7 @@ const AdminPanel = () => {
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 • List
               </button>
@@ -565,7 +568,7 @@ const AdminPanel = () => {
                 onClick={() =>
                   editor?.chain().focus().toggleOrderedList().run()
                 }
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 1. List
               </button>
@@ -575,7 +578,7 @@ const AdminPanel = () => {
                 onClick={() =>
                   editor?.chain().focus().setTextAlign("left").run()
                 }
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 Left
               </button>
@@ -584,7 +587,7 @@ const AdminPanel = () => {
                 onClick={() =>
                   editor?.chain().focus().setTextAlign("center").run()
                 }
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 Center
               </button>
@@ -593,23 +596,22 @@ const AdminPanel = () => {
                 onClick={() =>
                   editor?.chain().focus().setTextAlign("right").run()
                 }
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 Right
               </button>
 
-              {/* Direction for whole editor */}
               <button
                 type="button"
                 onClick={() => setEditorDir("ltr")}
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 LTR
               </button>
               <button
                 type="button"
                 onClick={() => setEditorDir("rtl")}
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 RTL
               </button>
@@ -620,7 +622,7 @@ const AdminPanel = () => {
                   const url = prompt("Enter URL");
                   if (url) editor?.chain().focus().setLink({ href: url }).run();
                 }}
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 Link
               </button>
@@ -630,7 +632,7 @@ const AdminPanel = () => {
                 onClick={() =>
                   editor?.chain().focus().unsetAllMarks().clearNodes().run()
                 }
-                className="px-2 py-1 border rounded"
+                className="px-2 py-1 rounded border border-black bg-black text-white hover:bg-neutral-900 active:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
               >
                 Clear
               </button>
