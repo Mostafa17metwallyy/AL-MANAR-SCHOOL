@@ -639,10 +639,13 @@ const AdminPanel = () => {
             </div>
 
             {/* Editor (direction applied to wrapper) */}
-            <div className="border rounded bg-white" dir={editorDir}>
+            <div
+              className="border border-black rounded bg-white"
+              dir={editorDir}
+            >
               <EditorContent
                 editor={editor}
-                className="min-h-[160px] px-3 py-2"
+                className="min-h-[160px] px-3 py-2 text-black caret-black"
               />
             </div>
 
