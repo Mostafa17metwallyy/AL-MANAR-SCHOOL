@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLanguage } from "./LanguageContext";
-import DOMPurify from "dompurify";
+import { sanitize } from "isomorphic-dompurify";
 
 const isArabic = (s = "") => /[\u0600-\u06FF]/.test(s);
 
@@ -148,8 +148,7 @@ const AnnouncementSection = () => {
                       }
                       className="prose max-w-none text-gray-800 leading-7 mb-3"
                       dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(
-                          // If older announcements are plain text (no tags), keep line breaks:
+                        __html: sanitize(
                           /<\/?[a-z][\s\S]*>/i.test(ann.description || "")
                             ? ann.description
                             : (ann.description || "").replace(/\n/g, "<br/>")
