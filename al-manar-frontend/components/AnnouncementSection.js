@@ -24,7 +24,7 @@ const SkeletonCard = () => (
   </div>
 );
 
-/* nice short date */
+/* short, locale-aware date */
 const fmtDate = (iso, ar) => {
   try {
     return new Intl.DateTimeFormat(ar ? "ar-EG" : "en-US", {
@@ -51,7 +51,6 @@ const AnnouncementSection = () => {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/announcements`);
         const data = await res.json();
         if (Array.isArray(data)) {
-          // newest first (in case API isn’t sorted)
           data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           setAnnouncements(data);
           setErr("");
@@ -112,36 +111,49 @@ const AnnouncementSection = () => {
               return (
                 <article
                   key={index}
-                  className="relative bg-white shadow-lg rounded-lg overflow-hidden transition-transform transform hover:scale-105 p-6 min-h-[260px]"
                   dir={rtl ? "rtl" : "ltr"}
+                  className="relative bg-white shadow-lg rounded-lg overflow-hidden transition-transform transform hover:scale-[1.01] p-6
+                             flex flex-col h-[420px] lg:h-[460px]"
                 >
-                  <h3 className="text-xl font-semibold text-teal-800 mb-2">{ann.title}</h3>
+                  {/* Title (non-scroll) */}
+                  <h3 className="text-xl font-semibold text-teal-800 mb-2 line-clamp-2">
+                    {ann.title}
+                  </h3>
 
-                  <div className={`${rtl ? "text-right" : "text-left"} text-gray-800 leading-7 mb-3`}>
-                    <div
-                      className="prose max-w-none text-gray-800 leading-7"
-                      dangerouslySetInnerHTML={{
-                        __html: sanitize(
-                          /<\/?[a-z][\s\S]*>/i.test(ann.description || "")
-                            ? ann.description
-                            : (ann.description || "").replace(/\n/g, "<br/>")
-                        ),
-                      }}
-                    />
+                  {/* Scrollable content area */}
+                  <div className={`flex-1 overflow-auto pr-1 ${rtl ? "text-right" : "text-left"}`}>
+                    {/* Description */}
+                    {ann.description && (
+                      <div
+                        className="prose prose-sm max-w-none text-gray-800 leading-relaxed"
+                        dangerouslySetInnerHTML={{
+                          __html: sanitize(
+                            /<\/?[a-z][\s\S]*>/i.test(ann.description || "")
+                              ? ann.description
+                              : (ann.description || "").replace(/\n/g, "<br/>")
+                          ),
+                        }}
+                      />
+                    )}
+
+                    {/* Media (kept inside the scroll area so card height stays fixed) */}
+                    {ann.mediaType === "image" && ann.mediaUrl && (
+                      <img
+                        src={ann.mediaUrl}
+                        alt="announcement media"
+                        className="w-full rounded-md object-contain mt-3"
+                      />
+                    )}
+
+                    {ann.mediaType === "video" && ann.mediaUrl && (
+                      <video controls className="w-full rounded-md mt-3">
+                        <source src={ann.mediaUrl} type="video/mp4" />
+                        {isAr ? "متصفحك لا يدعم تشغيل الفيديو." : "Your browser does not support the video tag."}
+                      </video>
+                    )}
                   </div>
 
-                  {ann.mediaType === "image" && ann.mediaUrl && (
-                    <img src={ann.mediaUrl} alt="announcement media" className="w-full rounded-md object-cover" />
-                  )}
-
-                  {ann.mediaType === "video" && ann.mediaUrl && (
-                    <video controls className="w-full rounded-md">
-                      <source src={ann.mediaUrl} type="video/mp4" />
-                      {isAr ? "متصفحك لا يدعم تشغيل الفيديو." : "Your browser does not support the video tag."}
-                    </video>
-                  )}
-
-                  {/* >>> Bottom-right creation date <<< */}
+                  {/* Fixed footer with creation date */}
                   <time
                     dateTime={ann.createdAt}
                     className={`absolute bottom-3 ${rtl ? "left-4" : "right-4"} text-xs text-gray-500`}
